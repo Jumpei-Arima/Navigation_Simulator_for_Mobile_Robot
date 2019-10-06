@@ -1,0 +1,11 @@
+*.pyc
+__pycache__
+*.egg-info
+*.swp
+.DS_Store
+.python-version
+build/
+*.so
+*.c
+*.pkl
+*cache/
