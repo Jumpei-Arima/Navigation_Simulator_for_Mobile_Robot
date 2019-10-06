@@ -3,7 +3,7 @@ import gym
 from nsmr.envs import NsmrGymEnv
 
 print("Navigation Simulator for Mobile Robot")
-env = NsmrGymEnv(layout="large_map")
+env = NsmrGymEnv(layout="simple_map")
 
 for i_episode in range(100):
     observation = env.reset()
