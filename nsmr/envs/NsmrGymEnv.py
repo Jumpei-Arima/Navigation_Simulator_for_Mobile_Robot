@@ -6,6 +6,7 @@ import pickle
 import numpy as np
 import gym
 from gym import spaces
+from gym.envs.classic_control import rendering
 from tqdm import tqdm
 
 from nsmr.envs.consts import *
@@ -84,6 +85,9 @@ class NsmrGymEnv(gym.Env):
         if self.state.is_goal():
             done = True
         return done
+
+    def close(self):
+        self.renderer.close()
 
 class State(object):
     def __init__(self,
@@ -253,6 +257,7 @@ class State(object):
             return False
         return open(fname, "r")
 
+
     def get_cache_filename(self, fname):
         if not os.path.exists(self.cache_dir_path):
             os.mkdir(self.cache_dir_path)
@@ -267,12 +272,11 @@ class Renderer(object):
         world_width_x = state.dimentions[0]*RESOLUTION + self.margin * 2.0
         world_width_y = state.dimentions[1]*RESOLUTION + self.margin * 2.0
         self.scale = screen_size / max(world_width_x, world_width_y)
-        self.screen_width = world_width_x*self.scale
-        self.screen_height = world_width_y*self.scale
+        self.screen_width = int(world_width_x*self.scale)
+        self.screen_height = int(world_width_y*self.scale)
 
     def render(self, state, mode):
         if self.viewer is None:
-            from gym.envs.classic_control import rendering
             self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
             #wall
             l, r, t, b = self.get_lrtb(0,state.dimentions[0],0,state.dimentions[1])
@@ -310,7 +314,6 @@ class Renderer(object):
         self.orientation_trans.set_translation(robot_x,robot_y)
         self.orientation_trans.set_rotation(robot_orientation)
         self.target_trans.set_translation((state.target[0]+self.margin)*self.scale,(state.target[1]+self.margin)*self.scale)
-        from gym.envs.classic_control import rendering
         for i in range(len(state.obs)):
             lidar = rendering.make_capsule(self.scale*state.obs[i],1.0)
             lidar_trans = rendering.Transform()
