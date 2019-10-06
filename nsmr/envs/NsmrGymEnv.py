@@ -90,7 +90,7 @@ class State(object):
                  layout = SIMPLE_MAP):
         basedir = os.path.dirname(__file__)
         self.cache_dir_path = os.path.join(basedir, ".nsmr_cache")
-        collision_map_file_path = os.path.join(self.cache_dir_path, str(layout)+'_collision_map.pkl')
+        collision_map_file_path = os.path.join(self.basedir,"layout, str(layout)+'_collision_map.pkl')
         layout = open(os.path.join(basedir, "layouts", layout + ".json"))
         cfilename = "{}.json".format(
             hashlib.md5(str(layout).encode()).hexdigest()[:10])
