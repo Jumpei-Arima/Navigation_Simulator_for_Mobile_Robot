@@ -6,7 +6,6 @@ import pickle
 import numpy as np
 import gym
 from gym import spaces
-from gym.envs.classic_control import rendering
 from tqdm import tqdm
 
 from nsmr.envs.consts import *
@@ -275,6 +274,7 @@ class Renderer(object):
         self.screen_height = int(world_width_y*self.scale)
 
     def render(self, state, mode):
+        from gym.envs.classic_control import rendering
         if self.viewer is None:
             self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
             #wall
