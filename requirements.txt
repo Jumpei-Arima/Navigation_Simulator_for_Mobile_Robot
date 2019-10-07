@@ -1,3 +1,4 @@
+setuptools>=41.4.0
 Cython>=0.29.6
 gym==0.14.0
 numpy>=1.16.2
