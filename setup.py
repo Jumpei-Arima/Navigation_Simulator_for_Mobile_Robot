@@ -31,5 +31,6 @@ setup(
     packages=find_packages(),
     install_requires=_requires_from_file('requirements.txt'),
     ext_modules=ext_modules,
-    cmdclass={'build_ext': build_ext}
+    cmdclass={'build_ext': build_ext},
+    extra_compile_args={'gcc': ['/Qstd=c99']},
 )
