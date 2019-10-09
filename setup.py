@@ -26,7 +26,7 @@ setup(
     maintainer_email='arijun0307@gmail.com',
     description='Navigation Simulator for Mobile Robot',
     long_description=readme,
-    python_requires='>3.6.0',
+    python_requires='>3.5.0',
     license="MIT",
     packages=find_packages(),
     install_requires=_requires_from_file('requirements.txt'),
