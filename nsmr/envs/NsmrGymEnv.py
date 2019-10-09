@@ -62,6 +62,8 @@ class NsmrGymEnv(gym.Env):
     def get_reward(self):
         if self.state.is_goal():
             reward = self.goal_reward
+        elif self.state.is_movable():
+            reward = -self.collision_penalty
         elif self.state.is_collision():
             reward = -self.collision_penalty
         else:
