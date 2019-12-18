@@ -9,20 +9,18 @@ from tqdm import tqdm
 from nsmr.envs.consts import *
 from nsmr.envs.obs.raycasting import Raycasting
 
-class State(object):
-    def __init__(self,
-                 layout = SIMPLE_MAP):
+class NSMR(object):
+    def __init__(self, layout = SIMPLE_MAP):
         basedir = os.path.dirname(__file__)
         self.cache_dir_path = os.path.join(basedir, ".nsmr_cache")
         collision_map_file_path = os.path.join(basedir,"layouts", str(layout)+'_collision_map.pkl')
         layout = open(os.path.join(basedir, "layouts", layout + ".json"))
-        cfilename = "{}.json".format(
-            hashlib.md5(str(layout).encode()).hexdigest()[:10])
+        cfilename = "{}.json".format(hashlib.md5(str(layout).encode()).hexdigest()[:10])
         cached_layout = self.lookup_cache(cfilename)
         cache_found = cached_layout is not False
         if cached_layout:
             print("Cached layout found")
-            #self.layout = cached_layout
+            self.layout = cached_layout
 
         self.layout = json.load(layout)
 
