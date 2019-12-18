@@ -91,17 +91,10 @@ class NSMR(object):
         return True if self.dis < ROBOT_RADIUS else False
  
     def get_lidar(self):
-        n = int(NUM_LIDAR/NUM_KERNEL)
-        obs = np.empty(n)
-        a_n = ANGLE_INCREMENT / (float)(NUM_KERNEL)
-        for i in range(n):
-            o = []
-            _start = i*NUM_KERNEL
-            _end = (i+1)*NUM_KERNEL-1
-            for j in range(_start, _end):
-                angle = j * a_n - MAX_ANGLE
-                o.append(self.lidar.process(self.pose,angle))
-            obs[i] = np.amin(o)
+        obs = np.empty(NUM_LIDAR)
+        for i in range(len(obs)):
+            angle = i * ANGLE_INCREMENT - MAX_ANGLE
+            obs[i] = self.lidar.process(self.pose, angle)
         self.obs = obs
         return obs
 

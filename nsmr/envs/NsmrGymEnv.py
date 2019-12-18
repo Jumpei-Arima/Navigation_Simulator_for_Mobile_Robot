@@ -21,7 +21,7 @@ class NsmrGymEnv(gym.Env):
 
         # gym space
         self.observation_space = spaces.Dict(dict(
-            lidar=spaces.Box(low=MIN_RANGE, high=MAX_RANGE, shape=(int(NUM_LIDAR/NUM_KERNEL),)),
+            lidar=spaces.Box(low=MIN_RANGE, high=MAX_RANGE, shape=(NUM_LIDAR,)),
             target=spaces.Box(np.array([MIN_TARGET_DISTANCE,-1.0,-1.0]), np.array([MAX_TARGET_DISTANCE,1.0,1.0]))
         ))
         self.action_space = spaces.Box(
