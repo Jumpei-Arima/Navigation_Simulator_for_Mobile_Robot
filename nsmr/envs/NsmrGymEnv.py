@@ -10,12 +10,16 @@ class NsmrGymEnv(gym.Env):
     def __init__(self,
                  layout=SIMPLE_MAP,
                  render=True,
-                 goal_reward=5.0,
-                 collision_penalty=5.0,
-                 alpha=0.3,
-                 beta=0.01,
-                 stop_penalty=0.05):
+                 reward_params={"goal_reward": 5.0,
+                                "collision_penalty": 5.0,
+                                "alpha": 0.3,
+                                "beta": 0.01,
+                                "stop_penalty": 0.05}
+                 ):
+        # simulator
         self.nsmr = NSMR(layout)
+
+        # gym space
         self.observation_space = spaces.Dict(dict(
             lidar=spaces.Box(low=MIN_RANGE, high=MAX_RANGE, shape=(int(NUM_LIDAR/NUM_KERNEL),)),
             target=spaces.Box(np.array([MIN_TARGET_DISTANCE,-1.0,-1.0]), np.array([MAX_TARGET_DISTANCE,1.0,1.0]))
@@ -23,12 +27,16 @@ class NsmrGymEnv(gym.Env):
         self.action_space = spaces.Box(
             np.array([MIN_LINEAR_VELOCITY,-MAX_ANGULAR_VELOCITY]),
             np.array([MAX_LINEAR_VELOCITY,MAX_ANGULAR_VELOCITY]))
+
+        # renderer
         self.renderer = Renderer(self.nsmr)
-        self.goal_reward = goal_reward
-        self.collision_penalty = collision_penalty
-        self.alpha = alpha
-        self.beta = beta
-        self.stop_penalty = stop_penalty
+
+        # reward params
+        self.goal_reward = reward_params["goal_reward"]
+        self.collision_penalty = reward_params["collision_penalty"]
+        self.alpha = reward_params["alpha"]
+        self.beta = reward_params["beta"]
+        self.stop_penalty = reward_params["stop_penalty"]
 
     def reset(self):
         self.t = 0
