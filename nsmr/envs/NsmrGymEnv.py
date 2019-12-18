@@ -4,7 +4,7 @@ from gym import spaces
 
 from nsmr.envs.consts import *
 from nsmr.envs.renderer import Renderer
-from nsmr.envs.state import State
+from nsmr.envs.nsmr import NSMR
 
 class NsmrGymEnv(gym.Env):
     def __init__(self,
@@ -15,7 +15,7 @@ class NsmrGymEnv(gym.Env):
                  alpha=0.3,
                  beta=0.01,
                  stop_penalty=0.05):
-        self.state = State(layout)
+        self.nsmr = NSMR(layout)
         self.observation_space = spaces.Dict(dict(
             lidar=spaces.Box(low=MIN_RANGE, high=MAX_RANGE, shape=(int(NUM_LIDAR/NUM_KERNEL),)),
             target=spaces.Box(np.array([MIN_TARGET_DISTANCE,-1.0,-1.0]), np.array([MAX_TARGET_DISTANCE,1.0,1.0]))
@@ -23,7 +23,7 @@ class NsmrGymEnv(gym.Env):
         self.action_space = spaces.Box(
             np.array([MIN_LINEAR_VELOCITY,-MAX_ANGULAR_VELOCITY]),
             np.array([MAX_LINEAR_VELOCITY,MAX_ANGULAR_VELOCITY]))
-        self.renderer = Renderer(self.state)
+        self.renderer = Renderer(self.nsmr)
         self.goal_reward = goal_reward
         self.collision_penalty = collision_penalty
         self.alpha = alpha
@@ -32,13 +32,13 @@ class NsmrGymEnv(gym.Env):
 
     def reset(self):
         self.t = 0
-        self.state.reset_pose()
+        self.nsmr.reset_pose()
         observation = self.get_observation()
         return observation
     
     def step(self, action):
         self.t += 1
-        self.state.update(action)
+        self.nsmr.update(action)
         observation = self.get_observation()
         reward = self.get_reward()
         done = self.is_done()
@@ -46,38 +46,38 @@ class NsmrGymEnv(gym.Env):
         return observation, reward, done, info
 
     def render(self, mode='human'):
-        self.renderer.render(self.state, mode)
+        self.renderer.render(self.nsmr, mode)
 
     def get_observation(self):
         observation = {}
-        observation["lidar"] = self.state.get_lidar()
-        observation["target"] = self.state.get_relative_target_position()
+        observation["lidar"] = self.nsmr.get_lidar()
+        observation["target"] = self.nsmr.get_relative_target_position()
         return observation
 
     def get_reward(self):
-        if self.state.is_goal():
+        if self.nsmr.is_goal():
             reward = self.goal_reward
-        elif not self.state.is_movable():
+        elif not self.nsmr.is_movable():
             reward = -self.collision_penalty
-        elif self.state.is_collision():
+        elif self.nsmr.is_collision():
             reward = -self.collision_penalty
         else:
-            reward = self.alpha*(self.state.pre_dis - self.state.dis)
-        if abs(self.state.pre_dis - self.state.dis) < 1e-6:
+            reward = self.alpha*(self.nsmr.pre_dis - self.nsmr.dis)
+        if abs(self.nsmr.pre_dis - self.nsmr.dis) < 1e-6:
             reward -= self.stop_penalty
-        reward -= self.beta/(2*np.pi)*abs(self.state.theta)
-        self.state.pre_dis = self.state.dis
+        reward -= self.beta/(2*np.pi)*abs(self.nsmr.theta)
+        self.nsmr.pre_dis = self.nsmr.dis
         return reward
     
     def is_done(self):
         done = False
         if self.t >= MAX_STEPS:
             done = True
-        if not self.state.is_movable():
+        if not self.nsmr.is_movable():
             done = True
-        if self.state.is_collision():
+        if self.nsmr.is_collision():
             done = True
-        if self.state.is_goal():
+        if self.nsmr.is_goal():
             done = True
         return done
 
