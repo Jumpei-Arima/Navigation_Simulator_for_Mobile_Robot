@@ -25,7 +25,7 @@ class NsmrGymEnv(gym.Env):
             target=spaces.Box(np.array([MIN_TARGET_DISTANCE,-1.0,-1.0]), np.array([MAX_TARGET_DISTANCE,1.0,1.0]))
         ))
         self.action_space = spaces.Box(
-            np.array([MIN_LINEAR_VELOCITY,-MAX_ANGULAR_VELOCITY]),
+            np.array([MIN_LINEAR_VELOCITY,MIN_ANGULAR_VELOCITY]),
             np.array([MAX_LINEAR_VELOCITY,MAX_ANGULAR_VELOCITY]))
 
         # renderer
