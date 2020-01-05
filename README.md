@@ -5,7 +5,6 @@ NSMR can be installed from source code.
 ```
 $ git clone https://github.com/Jumpei-Arima/Navigation_Simulator_for_Mobile_Robot
 $ cd Navigation_Simulator_for_Mobile_Robot
-$ pip install -r requirements.txt
 $ pip install -e .
 ```
 
