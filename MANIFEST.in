@@ -1,2 +1,3 @@
 include requirements.txt
 include LICENCE
+recursive-include *.json *.pkl
