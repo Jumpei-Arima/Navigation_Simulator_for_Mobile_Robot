@@ -1,10 +1,8 @@
 #!/usr/bin/env python
-import os
-
-from Cython.Distutils import build_ext
 from setuptools import setup
 from setuptools import find_packages
 from setuptools import Extension
+from setuptools import build_ext
 
 with open("README.md", "r") as f:
     readme = f.read()
