@@ -1,3 +1,2 @@
 include MANIFEST.in
 include requirements.txt
-recursive-include nsmr/envs/layouts/ *.*
