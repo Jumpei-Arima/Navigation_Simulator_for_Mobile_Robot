@@ -1,3 +1,3 @@
 include requirements.txt
-include LICENCE
-recursive-include nsmr *.json *.pkl
+include LICENSE
+recursive-include nsmr/envs/layouts *.json *.pkl
