@@ -14,10 +14,11 @@ class NsmrGymEnv(gym.Env):
                                 "collision_penalty": 5.0,
                                 "alpha": 0.3,
                                 "beta": 0.01,
-                                "stop_penalty": 0.05}
+                                "stop_penalty": 0.05},
+                 randomize=False
                  ):
         # simulator
-        self.nsmr = NSMR(layout)
+        self.nsmr = NSMR(layout, randomize)
 
         # gym space
         self.observation_space = spaces.Dict(dict(

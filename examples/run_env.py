@@ -12,9 +12,10 @@ if __name__ == "__main__":
     parser.add_argument('--max_episodes', type=int, default=100)
     parser.add_argument('--max_steps', type=int, default=1000)
     parser.add_argument('--no_render', action='store_true')
+    parser.add_argument('--randomize', action='store_true')
     args = parser.parse_args()
 
-    env = NsmrGymEnv(layout=args.layout)
+    env = NsmrGymEnv(layout=args.layout, randomize=args.randomize)
 
     for i_episode in range(args.max_episodes):
         observation = env.reset()
