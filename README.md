@@ -1,5 +1,7 @@
 # Navigation Simulator for Mobile Robot
 
+[![Build Status](https://travis-ci.com/Jumpei-Arima/Navigation_Simulator_for_Mobile_Robot.svg?branch=master)](https://travis-ci.com/Jumpei-Arima/Navigation_Simulator_for_Mobile_Robot)
+
 ## Installation
 NSMR can be installed by using `pip`.
 
