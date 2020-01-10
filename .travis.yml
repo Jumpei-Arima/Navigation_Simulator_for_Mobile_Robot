@@ -5,6 +5,7 @@ python:
 # Commands to install dependencies
 install:
     - pip3 install -e .
+    - pip3 install flake8
 
 # Commands to run tests
 script:
