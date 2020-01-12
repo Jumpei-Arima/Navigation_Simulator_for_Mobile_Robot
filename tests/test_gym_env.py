@@ -30,6 +30,7 @@ class TestNsmrGymEnv(TestCase):
 
         # Try stepping a few times
         for i in range(10):
+            env.render()
             action = env.action_space.sample()
             obs, reward, done, info = env.step(action)
 
