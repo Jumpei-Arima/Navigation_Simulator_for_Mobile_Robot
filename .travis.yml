@@ -8,7 +8,7 @@ python:
 install:
     - pip3 install -e .
     - pip3 install flake8
-    - coveralls
+    - pip3 install coveralls
 
 # Commands to run tests
 script:
