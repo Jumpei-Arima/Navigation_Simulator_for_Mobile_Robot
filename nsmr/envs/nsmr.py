@@ -22,6 +22,7 @@ class NSMR(object):
             self.layout = cached_layout
 
         self.layout = json.load(layout)
+        layout.close()
 
         self.randomize = randomize
 
@@ -166,8 +167,8 @@ class NSMR(object):
                         for j_ in range(radius*2):
                             x = int(i-radius+i_)
                             y = int(j-radius+j_)
-                            dis = np.sqrt((x-i)*(x-i)+(y-j)*(y-j))
                             if 0<x<self.dimentions[0]-1 and 0<y<self.dimentions[1]-1:
+                                dis = np.sqrt((x-i)*(x-i)+(y-j)*(y-j))
                                 if dis < radius:
                                     collision_map[x][y] = True
             if i%(self.dimentions[0]/100) == 0:
