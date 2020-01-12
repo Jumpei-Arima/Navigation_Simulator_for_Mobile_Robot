@@ -4,6 +4,9 @@ python:
     - "3.6"
     - "3.7"
 
+before_install:
+    - apt-get install python-opengl
+
 # Commands to install dependencies
 install:
     - pip3 install -e .
