@@ -43,12 +43,6 @@ class TestNsmrGymEnv(TestCase):
     def test_make_collision_map(self):
         shutil.copyfile("./tests/test_map.json", "./nsmr/envs/layouts/test_map.json")
         env = NsmrGymEnv(layout="test_map")
-        obs = env.reset()
-
-        # Try stepping a few times
-        for i in range(10):
-            action = env.action_space.sample()
-            obs, reward, done, info = env.step(action)
         env.close()
         os.remove("./nsmr/envs/layouts/test_map.json")
         os.remove("./nsmr/envs/layouts/test_map_collision_map.pkl")
