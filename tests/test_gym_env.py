@@ -1,5 +1,4 @@
 from unittest import TestCase
-import gym
 import nsmr
 from nsmr.envs import NsmrGymEnv
 
@@ -7,7 +6,7 @@ print(__file__)
 
 class TestNsmrGymEnv(TestCase):
     def test_main(self):
-        env = gym.make("nsmr-v0")
+        env = NsmrGymEnv()
         obs = env.reset()
 
         # Try stepping a few times
