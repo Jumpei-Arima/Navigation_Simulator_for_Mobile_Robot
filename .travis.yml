@@ -22,4 +22,4 @@ script:
     - xvfb-run -a -s "-screen 0 1024x768x24 -ac +extension GLX +render -noreset" ./run_tests.sh
 
 after_success:
-    - coveralls
+    - coveralls --base_dir nsmr/
