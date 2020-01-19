@@ -19,7 +19,7 @@ class TestNsmrGymEnv(TestCase):
 
     def test_randomize(self):
         env = gym.make("nsmr-v0")
-        env.set_randomimze(True)
+        env.set_randomize(True)
         obs = env.reset()
         # Try stepping a few times
         for i in range(10):
