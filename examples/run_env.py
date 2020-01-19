@@ -9,13 +9,13 @@ if __name__ == "__main__":
     print("Navigation Simulator for Mobile Robot")
     parser = argparse.ArgumentParser()
     parser.add_argument('--layout', type=str, default='simple_map')
-    parser.add_argument('--max_episodes', type=int, default=100)
+    parser.add_argument('--max_episodes', type=int, default=10)
     parser.add_argument('--max_steps', type=int, default=1000)
     parser.add_argument('--no_render', action='store_true')
     parser.add_argument('--randomize', action='store_true')
     args = parser.parse_args()
 
-    env = NsmrGymEnv(layout=args.layout, randomize=args.randomize)
+    env = gym.make("nsmr-v0")
 
     for i_episode in range(args.max_episodes):
         observation = env.reset()
@@ -32,3 +32,4 @@ if __name__ == "__main__":
             if done:
                 print("Episode %d  finished after %d timesteps, reward: %f "% (i_episode+1, t+1,ep_r))
                 break
+    env.close()
