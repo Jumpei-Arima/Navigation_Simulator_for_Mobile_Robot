@@ -9,7 +9,6 @@ from nsmr.envs.nsmr import NSMR
 class NsmrGymEnv(gym.Env):
     def __init__(self,
                  layout=SIMPLE_MAP,
-                 render=True,
                  reward_params={"goal_reward": 5.0,
                                 "collision_penalty": 5.0,
                                 "alpha": 0.3,
@@ -30,28 +29,37 @@ class NsmrGymEnv(gym.Env):
             np.array([MAX_LINEAR_VELOCITY,MAX_ANGULAR_VELOCITY]))
 
         # renderer
-        self.renderer = Renderer(self.nsmr)
+        self.renderer = Renderer(self.nsmr.dimentions)
 
         # reward params
-        self.goal_reward = reward_params["goal_reward"]
-        self.collision_penalty = reward_params["collision_penalty"]
-        self.alpha = reward_params["alpha"]
-        self.beta = reward_params["beta"]
-        self.stop_penalty = reward_params["stop_penalty"]
+        self.reward_params = reward_params
+
+    def set_reward_params(self, reward_params):
+        self.reward_params = reward_params
+
+    def set_randomize(self, randomize):
+        self.nsmr.randomize = randomize
+
+    def set_layout(self, layout):
+        self.nsmr.set_layout(layout)
+        self.renderer = Renderer(self.nsmr.dimentions)
 
     def reset(self):
         self.t = 0
         self.nsmr.reset_pose()
         observation = self.get_observation()
+        self.pre_dis = observation["target"][0]
+        self.goal = False
         return observation
     
     def step(self, action):
         self.t += 1
         self.nsmr.update(action)
         observation = self.get_observation()
-        reward = self.get_reward()
+        reward = self.get_reward(observation)
         done = self.is_done()
         info = {}
+
         return observation, reward, done, info
 
     def render(self, mode='human'):
@@ -63,30 +71,30 @@ class NsmrGymEnv(gym.Env):
         observation["target"] = self.nsmr.get_relative_target_position()
         return observation
 
-    def get_reward(self):
-        if self.nsmr.is_goal():
-            reward = self.goal_reward
-        elif not self.nsmr.is_movable():
-            reward = -self.collision_penalty
+    def get_reward(self, observation):
+        dis = observation["target"][0]
+        ddis = self.pre_dis - dis
+        theta = np.arccos(observation["target"][2])
+        if dis < ROBOT_RADIUS:
+            reward = self.reward_params["goal_reward"]
+            self.goal = True
         elif self.nsmr.is_collision():
-            reward = -self.collision_penalty
+            reward = -self.reward_params["collision_penalty"]
         else:
-            reward = self.alpha*(self.nsmr.pre_dis - self.nsmr.dis)
-        if abs(self.nsmr.pre_dis - self.nsmr.dis) < 1e-6:
-            reward -= self.stop_penalty
-        reward -= self.beta/(2*np.pi)*abs(self.nsmr.theta)
-        self.nsmr.pre_dis = self.nsmr.dis
+            reward = self.reward_params["alpha"] * ddis
+        if abs(ddis) < 1e-6:
+            reward -= self.reward_params["stop_penalty"]
+        reward -= self.reward_params["beta"]/(2*np.pi)*abs(theta)
+        self.pre_dis = dis
         return reward
     
     def is_done(self):
         done = False
         if self.t >= MAX_STEPS:
             done = True
-        if not self.nsmr.is_movable():
-            done = True
         if self.nsmr.is_collision():
             done = True
-        if self.nsmr.is_goal():
+        if self.goal:
             done = True
         return done
 
