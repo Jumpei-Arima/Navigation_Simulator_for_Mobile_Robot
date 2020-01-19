@@ -1,13 +1,13 @@
 from nsmr.envs.consts import *
 
 class Renderer(object):
-    def __init__(self, state):
+    def __init__(self, dimentions):
         self.viewer = None
         self.margin = 0.2
         screen_size = 600
         self.SKIP_RENDER = 20
-        world_width_x = state.dimentions[0]*RESOLUTION + self.margin * 2.0
-        world_width_y = state.dimentions[1]*RESOLUTION + self.margin * 2.0
+        world_width_x = dimentions[0]*RESOLUTION + self.margin * 2.0
+        world_width_y = dimentions[1]*RESOLUTION + self.margin * 2.0
         self.scale = screen_size / max(world_width_x, world_width_y)
         self.screen_width = int(world_width_x*self.scale)
         self.screen_height = int(world_width_y*self.scale)
