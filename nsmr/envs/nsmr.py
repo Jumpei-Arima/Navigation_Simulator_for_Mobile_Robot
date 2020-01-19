@@ -48,16 +48,6 @@ class NSMR(object):
     def available_index(self, i, j):
         return (0<=i<self.dimentions[0] and 0<=j<self.dimentions[1])
     
-    def is_movable(self, pose=None):
-        if pose is None:
-            pose = self.pose
-        i = int(pose[0]/RESOLUTION)
-        j = int(pose[1]/RESOLUTION)
-        if self.available_index(i, j):
-            return self.MAP[i][j] == 0
-        else:
-            return False
-
     def is_collision(self, pose=None):
         if pose is None:
             pose = self.pose
