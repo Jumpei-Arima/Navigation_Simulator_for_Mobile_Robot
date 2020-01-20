@@ -17,7 +17,7 @@ ext_modules = [
 
 setup(
     name='nsmr',
-    version='0.1.0',
+    version='0.1.1',
     url='https://github.com/Jumpei-Arima/Navigation_Simulator_for_Mobile_Robot',
     author='Jumpei Arima',
     author_email='arijun0307@gmail.com',
