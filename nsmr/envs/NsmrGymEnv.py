@@ -34,15 +34,20 @@ class NsmrGymEnv(gym.Env):
         # reward params
         self.reward_params = reward_params
 
+        self.reset()
+
     def set_reward_params(self, reward_params):
         self.reward_params = reward_params
+        self.reset()
 
     def set_randomize(self, randomize):
         self.nsmr.randomize = randomize
+        self.reset()
 
     def set_layout(self, layout):
         self.nsmr.set_layout(layout)
         self.renderer = Renderer(self.nsmr.dimentions)
+        self.reset()
 
     def reset(self):
         self.t = 0
