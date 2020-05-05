@@ -17,16 +17,6 @@ class TestNsmrGymEnv(TestCase):
             obs, reward, done, info = env.step(action)
         env.close()
 
-    def test_randomize(self):
-        env = gym.make("nsmr-v0")
-        env.set_randomize(True)
-        obs = env.reset()
-        # Try stepping a few times
-        for i in range(10):
-            action = env.action_space.sample()
-            obs, reward, done, info = env.step(action)
-        env.close()
-
     def test_render(self):
         env = gym.make("nsmr-v0")
         obs = env.reset()
@@ -63,7 +53,6 @@ class TestNsmrGymEnv(TestCase):
 if __name__ == '__main__':  # pragma: no cover
     test = TestNsmrGymEnv()
     test.test_main()
-    test.test_randomize()
     test.test_render()
     test.test_reward_params()
     test.test_make_collision_map()

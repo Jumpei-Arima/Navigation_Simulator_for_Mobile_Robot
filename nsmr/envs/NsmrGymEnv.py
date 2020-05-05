@@ -14,10 +14,9 @@ class NsmrGymEnv(gym.Env):
                                 "alpha": 0.3,
                                 "beta": 0.01,
                                 "stop_penalty": 0.05},
-                 randomize=False
                  ):
         # simulator
-        self.nsmr = NSMR(layout, randomize)
+        self.nsmr = NSMR(layout)
 
         # gym space
         self.observation_space = spaces.Dict(dict(
@@ -40,10 +39,6 @@ class NsmrGymEnv(gym.Env):
         self.reward_params = reward_params
         self.reset()
 
-    def set_randomize(self, randomize):
-        self.nsmr.randomize = randomize
-        self.reset()
-
     def set_layout(self, layout):
         self.nsmr.set_layout(layout)
         self.renderer = Renderer(self.nsmr.dimentions)
@@ -52,6 +47,7 @@ class NsmrGymEnv(gym.Env):
     def reset(self):
         self.t = 0
         self.nsmr.reset_pose()
+        self.nsmr.reset_noise_param()
         observation = self.get_observation()
         self.pre_dis = observation["target"][0]
         self.goal = False
