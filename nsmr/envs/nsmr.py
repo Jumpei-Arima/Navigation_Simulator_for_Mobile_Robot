@@ -9,12 +9,13 @@ from nsmr.envs.consts import *
 from nsmr.envs.obs.raycasting import Raycasting
 
 class NSMR(object):
-    def __init__(self, layout=SIMPLE_MAP, randomize=False):
-        self.randomize = randomize
+    def __init__(self, layout=SIMPLE_MAP):
         self.set_layout(layout)
         
         self.lidar = Raycasting(self.MAP)
         self.obs = None
+
+        self.reset_noise_param()
 
     def reset_pose(self):
         while True:
@@ -29,14 +30,58 @@ class NSMR(object):
                 break
         self.target = target
 
+    def reset_noise_param(self):
+        self.distance_until_noise = np.random.exponential(1.0/(1e-100 + NOISE_PER_METER))
+        self.time_until_stuck = np.random.exponential(EXPECTED_STUCK_TIME)
+        self.time_until_escape = np.random.exponential(EXPECTED_ESCAPE_TIME)
+        self.is_stuck = False
+        self.lidar_pos_noise = [np.random.normal(0.0, LIDAR_POSE_NOISE),
+                                np.random.normal(0.0, LIDAR_POSE_NOISE),
+                                np.random.normal(0.0, LIDAR_ORIENTATION_NOISE)]
+
     def update(self, action):
-        if self.randomize:
-            action[0] += np.random.normal(0, LINEAR_VELOCITY_NOISE)
-            action[1] += np.random.normal(0, ANGULAR_VELOCITY_NOISE)
-        self.pose[0] += action[0]*np.cos(self.pose[2])*DT
-        self.pose[1] += action[0]*np.sin(self.pose[2])*DT
-        self.pose[2] += action[1]*DT
+        action = self.add_bias(action)
+        action = self.stuck(action)
+        self.state_transition(action)
+        self.add_noise(action)
+
+    def state_transition(self, action):
+        pre_theta = self.pose[2]
+        if abs(action[1])<1e-10:
+            self.pose[0] += action[0]*np.cos(pre_theta)*DT
+            self.pose[1] += action[0]*np.sin(pre_theta)*DT
+            self.pose[2] += action[1]*DT
+        else:
+            self.pose[0] += action[0]/action[1]*(np.sin(pre_theta+action[1]*DT)-np.sin(pre_theta))
+            self.pose[1] += action[0]/action[1]*(-np.cos(pre_theta+action[1]*DT)+np.cos(pre_theta))
+            self.pose[2] += action[1]*DT
         self.pose[2] = self.angle_normalize(self.pose[2])
+
+    def add_noise(self, action):
+        self.distance_until_noise -= abs(action[0])*DT + ROBOT_RADIUS*abs(action[1])*DT
+        if self.distance_until_noise <= 0:
+            self.distance_until_noise += np.random.exponential(1.0/(1e-100 + NOISE_PER_METER))
+            self.pose[2] += np.random.normal(0, ANGLE_NOISE)
+
+    def add_bias(self, action):
+        action[0] *= np.random.normal(1.0, LINEAR_VELOCITY_NOISE)
+        action[1] *= np.random.normal(1.0, ANGULAR_VELOCITY_NOISE)
+        return action
+
+    def stuck(self, action):
+        if self.is_stuck:
+            self.time_until_escape -= DT
+            if self.time_until_escape <= 0.0:
+                self.time_until_escape += np.random.exponential(EXPECTED_ESCAPE_TIME)
+                self.is_stuck = False
+        else:
+            self.time_until_stuck -= DT
+            if self.time_until_stuck <= 0.0:
+                self.time_until_stuck += np.random.exponential(EXPECTED_STUCK_TIME)
+                self.is_stuck = True
+        action[0] *= (not self.is_stuck)
+        action[1] *= (not self.is_stuck)
+        return action
 
     def set_layout(self, layout):
         self.layout = self.get_layout(layout)
@@ -61,12 +106,14 @@ class NSMR(object):
     def get_lidar(self, pose=None):
         if pose is None:
             pose = self.pose
+        pose += self.lidar_pos_noise
         obs = np.empty(NUM_LIDAR)
         for i in range(len(obs)):
             angle = i * ANGLE_INCREMENT - MAX_ANGLE
             obs[i] = self.lidar.process(pose, angle)
-        if self.randomize:
-            obs += np.random.normal(0, LIDAR_NOISE)
+            if np.random.rand() < OVERSIGHT_PROB:
+                obs[i] = np.random.rand()*(MAX_RANGE-MIN_RANGE) + MIN_RANGE
+        obs += np.random.normal(0, LIDAR_NOISE)
         self.obs = obs
         return obs
 
