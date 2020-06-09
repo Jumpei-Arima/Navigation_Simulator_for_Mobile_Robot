@@ -105,8 +105,10 @@ class NSMR(object):
 
     def get_lidar(self, pose=None):
         if pose is None:
-            pose = self.pose
-        pose += self.lidar_pos_noise
+            pose = self.pose.copy()
+        pose[0] = self.lidar_pos_noise[0]
+        pose[1] = self.lidar_pos_noise[1]
+        pose[2] = self.lidar_pos_noise[2]
         obs = np.empty(NUM_LIDAR)
         for i in range(len(obs)):
             angle = i * ANGLE_INCREMENT - MAX_ANGLE
@@ -124,7 +126,7 @@ class NSMR(object):
             target = self.target
         dis = self.get_dis(target, pose)
         theta = np.arctan2((target[1]-pose[1]),(target[0]-pose[0]))
-        theta = self.angle_diff(theta, self.pose[2])
+        theta = self.angle_diff(theta, pose[2])
         return np.array([dis, np.sin(theta), np.cos(theta)])
 
     def angle_normalize(self, z):
