@@ -106,9 +106,9 @@ class NSMR(object):
     def get_lidar(self, pose=None):
         if pose is None:
             pose = self.pose.copy()
-        pose[0] = self.lidar_pos_noise[0]
-        pose[1] = self.lidar_pos_noise[1]
-        pose[2] = self.lidar_pos_noise[2]
+        pose[0] += self.lidar_pos_noise[0]
+        pose[1] += self.lidar_pos_noise[1]
+        pose[2] += self.lidar_pos_noise[2]
         obs = np.empty(NUM_LIDAR)
         for i in range(len(obs)):
             angle = i * ANGLE_INCREMENT - MAX_ANGLE
