@@ -52,15 +52,16 @@ class Renderer(object):
         self.orientation_trans.set_translation(robot_x,robot_y)
         self.orientation_trans.set_rotation(robot_orientation)
         self.target_trans.set_translation((state.target[0]+self.margin)*self.scale,(state.target[1]+self.margin)*self.scale)
-        for i in range(int(len(state.obs))):
-            if i%self.SKIP_RENDER == 0:
-                lidar = rendering.make_capsule(self.scale*state.obs[i],1.0)
-                lidar_trans = rendering.Transform()
-                lidar_trans.set_translation(robot_x,robot_y)
-                lidar_trans.set_rotation(state.pose[2] + i*ANGLE_INCREMENT - MAX_ANGLE)
-                lidar.set_color(1.0,0.0,0.0)
-                lidar.add_attr(lidar_trans)
-                self.viewer.add_onetime(lidar)
+        if state.obs is not None:
+            for i in range(int(len(state.obs))):
+                if i%self.SKIP_RENDER == 0:
+                    lidar = rendering.make_capsule(self.scale*state.obs[i],1.0)
+                    lidar_trans = rendering.Transform()
+                    lidar_trans.set_translation(robot_x,robot_y)
+                    lidar_trans.set_rotation(state.pose[2] + i*ANGLE_INCREMENT - MAX_ANGLE)
+                    lidar.set_color(1.0,0.0,0.0)
+                    lidar.add_attr(lidar_trans)
+                    self.viewer.add_onetime(lidar)
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
     def get_lrtb(self, l, r, t, b):

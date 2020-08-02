@@ -1,5 +1,6 @@
 SIMPLE_MAP = "simple_map"
 LARGE_MAP = "large_map"
+NO_OBJECT = "no_object"
 RESOLUTION = 0.01
 
 ROBOT_RADIUS = 0.3
