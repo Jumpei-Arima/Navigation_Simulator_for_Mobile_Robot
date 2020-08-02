@@ -1,13 +1,12 @@
 import numpy as np
 import gym
 from gym import spaces
-from gym.utils import seeding
 
 from nsmr.envs.consts import *
 from nsmr.envs.renderer import Renderer
 from nsmr.envs.nsmr import NSMR
 
-class NsmrGymEnv(gym.Env):
+class NsmrSimpleGymEnv(gym.Env):
     def __init__(self,
                  layout=SIMPLE_MAP,
                  reward_params={"goal_reward": 5.0,
@@ -21,14 +20,12 @@ class NsmrGymEnv(gym.Env):
 
         # gym space
         self.observation_space = spaces.Dict(dict(
-            lidar=spaces.Box(low=MIN_RANGE, high=MAX_RANGE, shape=(NUM_LIDAR,), dtype=np.float32),
-            target=spaces.Box(np.array([MIN_TARGET_DISTANCE,-1.0,-1.0]), np.array([MAX_TARGET_DISTANCE,1.0,1.0]), dtype=np.float32)
+            pose=spaces.Box(np.array([-10,-10,-3.141592]), np.array([10,10,3.141592])),
+            target=spaces.Box(np.array([-10,-10,-3.141592]), np.array([10,10,3.141592]))
         ))
         self.action_space = spaces.Box(
-            low = np.array([MIN_LINEAR_VELOCITY,MIN_ANGULAR_VELOCITY]),
-            high = np.array([MAX_LINEAR_VELOCITY,MAX_ANGULAR_VELOCITY]),
-            dtype = np.float32
-            )
+            np.array([MIN_LINEAR_VELOCITY,MIN_ANGULAR_VELOCITY]),
+            np.array([MAX_LINEAR_VELOCITY,MAX_ANGULAR_VELOCITY]))
 
         # renderer
         self.renderer = Renderer(self.nsmr.dimentions)
@@ -62,7 +59,7 @@ class NsmrGymEnv(gym.Env):
         observation = self.get_observation()
         reward = self.get_reward(observation)
         done = self.is_done()
-        info = {"pose": self.nsmr.pose, "target": self.nsmr.target}
+        info = {}
 
         return observation, reward, done, info
 
@@ -71,14 +68,15 @@ class NsmrGymEnv(gym.Env):
 
     def get_observation(self):
         observation = {}
-        observation["lidar"] = self.nsmr.get_lidar()
-        observation["target"] = self.nsmr.get_relative_target_position()
+        observation["pose"] = self.nsmr.pose
+        observation["target"] = self.nsmr.target
         return observation
 
     def get_reward(self, observation):
-        dis = observation["target"][0]
+        target_info = self.nsmr.get_relative_target_position()
+        dis = target_info[0]
         ddis = self.pre_dis - dis
-        theta = np.arccos(observation["target"][2])
+        theta = np.arccos(target_info[2])
         if dis < ROBOT_RADIUS:
             reward = self.reward_params["goal_reward"]
             self.goal = True
