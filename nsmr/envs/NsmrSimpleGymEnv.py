@@ -8,9 +8,8 @@ from nsmr.envs.nsmr import NSMR
 
 class NsmrSimpleGymEnv(gym.Env):
     def __init__(self,
-                 layout=SIMPLE_MAP,
+                 layout=NO_OBJECT,
                  reward_params={"goal_reward": 5.0,
-                                "collision_penalty": 5.0,
                                 "alpha": 0.3,
                                 "beta": 0.01,
                                 "stop_penalty": 0.05},
@@ -80,8 +79,6 @@ class NsmrSimpleGymEnv(gym.Env):
         if dis < ROBOT_RADIUS:
             reward = self.reward_params["goal_reward"]
             self.goal = True
-        elif self.nsmr.is_collision():
-            reward = -self.reward_params["collision_penalty"]
         else:
             reward = self.reward_params["alpha"] * ddis
         if abs(ddis) < 1e-6:
@@ -94,11 +91,13 @@ class NsmrSimpleGymEnv(gym.Env):
         done = False
         if self.t >= MAX_STEPS:
             done = True
-        if self.nsmr.is_collision():
-            done = True
         if self.goal:
             done = True
         return done
 
     def close(self):
         self.renderer.close()
+
+    def seed(self, seed=None):
+        self.np_random, seed = seeding.np_random(seed)
+        return [seed]
