@@ -8,6 +8,10 @@ from nsmr.envs.renderer import Renderer
 from nsmr.envs.nsmr import NSMR
 
 class NsmrGymEnv(gym.Env):
+    metadata = {
+        'render.modes': ['human', 'rgb_array'],
+        'video.frames_per_second': 50
+    }
     def __init__(self,
                  layout=SIMPLE_MAP,
                  reward_params={"goal_reward": 5.0,
@@ -67,7 +71,7 @@ class NsmrGymEnv(gym.Env):
         return observation, reward, done, info
 
     def render(self, mode='human'):
-        self.renderer.render(self.nsmr, mode)
+        return self.renderer.render(self.nsmr, mode)
 
     def get_observation(self):
         observation = {}
