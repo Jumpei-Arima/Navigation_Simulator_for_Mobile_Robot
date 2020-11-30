@@ -39,6 +39,6 @@ jobs:
     - name: Test
       run: |
         xvfb-run -a -s "-screen 0 1024x768x24 -ac +extension GLX +render -noreset" ./run_tests.sh
-    -name: coverage
+    - name: coverage
       run: |
         coveralls
