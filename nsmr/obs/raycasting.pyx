@@ -10,9 +10,9 @@ from nsmr.envs.consts import *
 @cython.wraparound(False)
 
 class Raycasting():
-    def __init__(self, list MAP):
-        self.MAP_RESO = 1.0 / RESOLUTION
-        self.MAP_RESOLUTION = RESOLUTION
+    def __init__(self, list MAP, double resolution):
+        self.MAP_RESO = 1.0 / resolution
+        self.MAP_RESOLUTION = resolution
         self.MAP = MAP
         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
 
