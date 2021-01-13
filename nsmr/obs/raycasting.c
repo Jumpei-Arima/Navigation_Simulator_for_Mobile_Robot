@@ -955,53 +955,6 @@ static CYTHON_INLINE int __Pyx_ListComp_Append(PyObject* list, PyObject* x) {
 #define __Pyx_ListComp_Append(L,x) PyList_Append(L,x)
 #endif
 
-/* PyDictVersioning.proto */
-#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
-#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
-    (version_var) = __PYX_GET_DICT_VERSION(dict);\
-    (cache_var) = (value);
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
-        (VAR) = __pyx_dict_cached_value;\
-    } else {\
-        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
-        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
-    }\
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
-#else
-#define __PYX_GET_DICT_VERSION(dict)  (0)
-#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
-#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
-#endif
-
-/* GetModuleGlobalName.proto */
-#if CYTHON_USE_DICT_VERSIONS
-#define __Pyx_GetModuleGlobalName(var, name)  {\
-    static PY_UINT64_T __pyx_dict_version = 0;\
-    static PyObject *__pyx_dict_cached_value = NULL;\
-    (var) = (likely(__pyx_dict_version == __PYX_GET_DICT_VERSION(__pyx_d))) ?\
-        (likely(__pyx_dict_cached_value) ? __Pyx_NewRef(__pyx_dict_cached_value) : __Pyx_GetBuiltinName(name)) :\
-        __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-}
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  {\
-    PY_UINT64_T __pyx_dict_version;\
-    PyObject *__pyx_dict_cached_value;\
-    (var) = __Pyx__GetModuleGlobalName(name, &__pyx_dict_version, &__pyx_dict_cached_value);\
-}
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value);
-#else
-#define __Pyx_GetModuleGlobalName(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-#define __Pyx_GetModuleGlobalNameUncached(var, name)  (var) = __Pyx__GetModuleGlobalName(name)
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name);
-#endif
-
 /* SetItemInt.proto */
 #define __Pyx_SetItemInt(o, i, v, type, is_signed, to_py_func, is_list, wraparound, boundscheck)\
     (__Pyx_fits_Py_ssize_t(i, type, is_signed) ?\
@@ -1156,6 +1109,32 @@ static PyObject *__Pyx_Py3MetaclassPrepare(PyObject *metaclass, PyObject *bases,
 static PyObject *__Pyx_Py3ClassCreate(PyObject *metaclass, PyObject *name, PyObject *bases, PyObject *dict,
                                       PyObject *mkw, int calculate_metaclass, int allow_py2_metaclass);
 
+/* PyDictVersioning.proto */
+#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+#define __PYX_DICT_VERSION_INIT  ((PY_UINT64_T) -1)
+#define __PYX_GET_DICT_VERSION(dict)  (((PyDictObject*)(dict))->ma_version_tag)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)\
+    (version_var) = __PYX_GET_DICT_VERSION(dict);\
+    (cache_var) = (value);
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP) {\
+    static PY_UINT64_T __pyx_dict_version = 0;\
+    static PyObject *__pyx_dict_cached_value = NULL;\
+    if (likely(__PYX_GET_DICT_VERSION(DICT) == __pyx_dict_version)) {\
+        (VAR) = __pyx_dict_cached_value;\
+    } else {\
+        (VAR) = __pyx_dict_cached_value = (LOOKUP);\
+        __pyx_dict_version = __PYX_GET_DICT_VERSION(DICT);\
+    }\
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj);
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj);
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version);
+#else
+#define __PYX_GET_DICT_VERSION(dict)  (0)
+#define __PYX_UPDATE_DICT_CACHE(dict, value, cache_var, version_var)
+#define __PYX_PY_DICT_LOOKUP_IF_MODIFIED(VAR, DICT, LOOKUP)  (VAR) = (LOOKUP);
+#endif
+
 /* PyThreadStateGet.proto */
 #if CYTHON_FAST_THREAD_STATE
 #define __Pyx_PyThreadState_declare  PyThreadState *__pyx_tstate;
@@ -1243,9 +1222,6 @@ static CYTHON_INLINE int __Pyx_PyErr_GivenExceptionMatches2(PyObject *err, PyObj
 #endif
 #define __Pyx_PyException_Check(obj) __Pyx_TypeCheck(obj, PyExc_Exception)
 
-/* CStringEquals.proto */
-static CYTHON_INLINE int __Pyx_StrEq(const char *, const char *);
-
 /* CheckBinaryVersion.proto */
 static int __Pyx_check_binary_version(void);
 
@@ -1264,12 +1240,11 @@ int __pyx_module_is_main_nsmr__obs__raycasting = 0;
 
 /* Implementation of 'nsmr.obs.raycasting' */
 static PyObject *__pyx_builtin_range;
-static const char __pyx_k_[] = "*";
 static const char __pyx_k_i[] = "i";
 static const char __pyx_k_j[] = "j";
 static const char __pyx_k_x[] = "x";
 static const char __pyx_k_y[] = "y";
-static const char __pyx_k__4[] = "_";
+static const char __pyx_k__3[] = "_";
 static const char __pyx_k_dx[] = "dx";
 static const char __pyx_k_dy[] = "dy";
 static const char __pyx_k_x0[] = "x0";
@@ -1303,30 +1278,28 @@ static const char __pyx_k_x_limit[] = "x_limit";
 static const char __pyx_k_MAP_RESO[] = "MAP_RESO";
 static const char __pyx_k_MAP_SIZE[] = "MAP_SIZE";
 static const char __pyx_k_qualname[] = "__qualname__";
-static const char __pyx_k_MAX_RANGE[] = "MAX_RANGE";
+static const char __pyx_k_max_range[] = "max_range";
 static const char __pyx_k_metaclass[] = "__metaclass__";
+static const char __pyx_k_min_range[] = "min_range";
 static const char __pyx_k_Raycasting[] = "Raycasting";
 static const char __pyx_k_resolution[] = "resolution";
 static const char __pyx_k_MAP_RESOLUTION[] = "MAP_RESOLUTION";
 static const char __pyx_k_is_movable_grid[] = "is_movable_grid";
-static const char __pyx_k_nsmr_envs_consts[] = "nsmr.envs.consts";
 static const char __pyx_k_Raycasting___init[] = "Raycasting.__init__";
 static const char __pyx_k_Raycasting_process[] = "Raycasting.process";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_nsmr_obs_raycasting[] = "nsmr.obs.raycasting";
 static const char __pyx_k_nsmr_obs_raycasting_pyx[] = "nsmr/obs/raycasting.pyx";
 static const char __pyx_k_Raycasting_is_movable_grid[] = "Raycasting.is_movable_grid";
-static PyObject *__pyx_n_s_;
 static PyObject *__pyx_n_s_MAP;
 static PyObject *__pyx_n_s_MAP_RESO;
 static PyObject *__pyx_n_s_MAP_RESOLUTION;
 static PyObject *__pyx_n_s_MAP_SIZE;
-static PyObject *__pyx_n_s_MAX_RANGE;
 static PyObject *__pyx_n_s_Raycasting;
 static PyObject *__pyx_n_s_Raycasting___init;
 static PyObject *__pyx_n_s_Raycasting_is_movable_grid;
 static PyObject *__pyx_n_s_Raycasting_process;
-static PyObject *__pyx_n_s__4;
+static PyObject *__pyx_n_s__3;
 static PyObject *__pyx_n_s_angle;
 static PyObject *__pyx_n_s_cline_in_traceback;
 static PyObject *__pyx_n_s_derror;
@@ -1341,10 +1314,11 @@ static PyObject *__pyx_n_s_is_movable_grid;
 static PyObject *__pyx_n_s_j;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_n_s_math;
+static PyObject *__pyx_n_s_max_range;
 static PyObject *__pyx_n_s_metaclass;
+static PyObject *__pyx_n_s_min_range;
 static PyObject *__pyx_n_s_module;
 static PyObject *__pyx_n_s_name;
-static PyObject *__pyx_n_s_nsmr_envs_consts;
 static PyObject *__pyx_n_s_nsmr_obs_raycasting;
 static PyObject *__pyx_kp_s_nsmr_obs_raycasting_pyx;
 static PyObject *__pyx_n_s_pose;
@@ -1368,25 +1342,25 @@ static PyObject *__pyx_n_s_y0;
 static PyObject *__pyx_n_s_y1;
 static PyObject *__pyx_n_s_y_2;
 static PyObject *__pyx_n_s_y_step;
-static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_MAP, double __pyx_v_resolution); /* proto */
+static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_MAP, double __pyx_v_resolution, double __pyx_v_max_range, double __pyx_v_min_range); /* proto */
 static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_pose, double __pyx_v_angle, PyObject *__pyx_v_MAP); /* proto */
 static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_pose); /* proto */
 static PyObject *__pyx_int_0;
-static PyObject *__pyx_tuple__2;
-static PyObject *__pyx_tuple__5;
+static PyObject *__pyx_tuple_;
+static PyObject *__pyx_tuple__4;
+static PyObject *__pyx_tuple__6;
 static PyObject *__pyx_tuple__7;
-static PyObject *__pyx_tuple__8;
-static PyObject *__pyx_codeobj__3;
-static PyObject *__pyx_codeobj__6;
-static PyObject *__pyx_codeobj__9;
+static PyObject *__pyx_codeobj__2;
+static PyObject *__pyx_codeobj__5;
+static PyObject *__pyx_codeobj__8;
 /* Late includes */
 
-/* "nsmr/obs/raycasting.pyx":13
+/* "nsmr/obs/raycasting.pyx":11
  * 
  * class Raycasting():
- *     def __init__(self, list MAP, double resolution):             # <<<<<<<<<<<<<<
- *         self.MAP_RESO = 1.0 / resolution
- *         self.MAP_RESOLUTION = resolution
+ *     def __init__(self,             # <<<<<<<<<<<<<<
+ *                  list MAP,
+ *                  double resolution,
  */
 
 /* Python wrapper */
@@ -1396,6 +1370,8 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_1__init__(PyObjec
   PyObject *__pyx_v_self = 0;
   PyObject *__pyx_v_MAP = 0;
   double __pyx_v_resolution;
+  double __pyx_v_max_range;
+  double __pyx_v_min_range;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -1403,12 +1379,16 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_1__init__(PyObjec
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__init__ (wrapper)", 0);
   {
-    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_self,&__pyx_n_s_MAP,&__pyx_n_s_resolution,0};
-    PyObject* values[3] = {0,0,0};
+    static PyObject **__pyx_pyargnames[] = {&__pyx_n_s_self,&__pyx_n_s_MAP,&__pyx_n_s_resolution,&__pyx_n_s_max_range,&__pyx_n_s_min_range,0};
+    PyObject* values[5] = {0,0,0,0,0};
     if (unlikely(__pyx_kwds)) {
       Py_ssize_t kw_args;
       const Py_ssize_t pos_args = PyTuple_GET_SIZE(__pyx_args);
       switch (pos_args) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        CYTHON_FALLTHROUGH;
         case  3: values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
         CYTHON_FALLTHROUGH;
         case  2: values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
@@ -1427,39 +1407,62 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_1__init__(PyObjec
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_MAP)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 1); __PYX_ERR(0, 13, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, 1); __PYX_ERR(0, 11, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_resolution)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 2); __PYX_ERR(0, 13, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, 2); __PYX_ERR(0, 11, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  3:
+        if (likely((values[3] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_max_range)) != 0)) kw_args--;
+        else {
+          __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, 3); __PYX_ERR(0, 11, __pyx_L3_error)
+        }
+        CYTHON_FALLTHROUGH;
+        case  4:
+        if (kw_args > 0) {
+          PyObject* value = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_min_range);
+          if (value) { values[4] = value; kw_args--; }
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 13, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 11, __pyx_L3_error)
       }
-    } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
-      goto __pyx_L5_argtuple_error;
     } else {
-      values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
-      values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
-      values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+      switch (PyTuple_GET_SIZE(__pyx_args)) {
+        case  5: values[4] = PyTuple_GET_ITEM(__pyx_args, 4);
+        CYTHON_FALLTHROUGH;
+        case  4: values[3] = PyTuple_GET_ITEM(__pyx_args, 3);
+        values[2] = PyTuple_GET_ITEM(__pyx_args, 2);
+        values[1] = PyTuple_GET_ITEM(__pyx_args, 1);
+        values[0] = PyTuple_GET_ITEM(__pyx_args, 0);
+        break;
+        default: goto __pyx_L5_argtuple_error;
+      }
     }
     __pyx_v_self = values[0];
     __pyx_v_MAP = ((PyObject*)values[1]);
     __pyx_v_resolution = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_resolution == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 13, __pyx_L3_error)
+    __pyx_v_max_range = __pyx_PyFloat_AsDouble(values[3]); if (unlikely((__pyx_v_max_range == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 14, __pyx_L3_error)
+    if (values[4]) {
+      __pyx_v_min_range = __pyx_PyFloat_AsDouble(values[4]); if (unlikely((__pyx_v_min_range == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L3_error)
+    } else {
+      __pyx_v_min_range = ((double)((double)0.0));
+    }
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 13, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 11, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("nsmr.obs.raycasting.Raycasting.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_MAP), (&PyList_Type), 1, "MAP", 1))) __PYX_ERR(0, 13, __pyx_L1_error)
-  __pyx_r = __pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(__pyx_self, __pyx_v_self, __pyx_v_MAP, __pyx_v_resolution);
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_MAP), (&PyList_Type), 1, "MAP", 1))) __PYX_ERR(0, 12, __pyx_L1_error)
+  __pyx_r = __pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(__pyx_self, __pyx_v_self, __pyx_v_MAP, __pyx_v_resolution, __pyx_v_max_range, __pyx_v_min_range);
 
   /* function exit code */
   goto __pyx_L0;
@@ -1470,7 +1473,7 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_1__init__(PyObjec
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_MAP, double __pyx_v_resolution) {
+static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(CYTHON_UNUSED PyObject *__pyx_self, PyObject *__pyx_v_self, PyObject *__pyx_v_MAP, double __pyx_v_resolution, double __pyx_v_max_range, double __pyx_v_min_range) {
   PyObject *__pyx_r = NULL;
   __Pyx_RefNannyDeclarations
   PyObject *__pyx_t_1 = NULL;
@@ -1482,66 +1485,90 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(CYTHON_U
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "nsmr/obs/raycasting.pyx":14
- * class Raycasting():
- *     def __init__(self, list MAP, double resolution):
+  /* "nsmr/obs/raycasting.pyx":16
+ *                  double max_range,
+ *                  double min_range=0.0):
  *         self.MAP_RESO = 1.0 / resolution             # <<<<<<<<<<<<<<
  *         self.MAP_RESOLUTION = resolution
- *         self.MAP = MAP
+ *         self.max_range = max_range
  */
   if (unlikely(__pyx_v_resolution == 0)) {
     PyErr_SetString(PyExc_ZeroDivisionError, "float division");
-    __PYX_ERR(0, 14, __pyx_L1_error)
+    __PYX_ERR(0, 16, __pyx_L1_error)
   }
-  __pyx_t_1 = PyFloat_FromDouble((1.0 / __pyx_v_resolution)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 14, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble((1.0 / __pyx_v_resolution)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO, __pyx_t_1) < 0) __PYX_ERR(0, 14, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO, __pyx_t_1) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":15
- *     def __init__(self, list MAP, double resolution):
+  /* "nsmr/obs/raycasting.pyx":17
+ *                  double min_range=0.0):
  *         self.MAP_RESO = 1.0 / resolution
  *         self.MAP_RESOLUTION = resolution             # <<<<<<<<<<<<<<
+ *         self.max_range = max_range
+ *         self.min_range = min_range
+ */
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_resolution); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION, __pyx_t_1) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "nsmr/obs/raycasting.pyx":18
+ *         self.MAP_RESO = 1.0 / resolution
+ *         self.MAP_RESOLUTION = resolution
+ *         self.max_range = max_range             # <<<<<<<<<<<<<<
+ *         self.min_range = min_range
+ *         self.MAP = MAP
+ */
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_max_range); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_max_range, __pyx_t_1) < 0) __PYX_ERR(0, 18, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+
+  /* "nsmr/obs/raycasting.pyx":19
+ *         self.MAP_RESOLUTION = resolution
+ *         self.max_range = max_range
+ *         self.min_range = min_range             # <<<<<<<<<<<<<<
  *         self.MAP = MAP
  *         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
  */
-  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_resolution); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __pyx_t_1 = PyFloat_FromDouble(__pyx_v_min_range); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION, __pyx_t_1) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_min_range, __pyx_t_1) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":16
- *         self.MAP_RESO = 1.0 / resolution
- *         self.MAP_RESOLUTION = resolution
+  /* "nsmr/obs/raycasting.pyx":20
+ *         self.max_range = max_range
+ *         self.min_range = min_range
  *         self.MAP = MAP             # <<<<<<<<<<<<<<
  *         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
  * 
  */
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP, __pyx_v_MAP) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP, __pyx_v_MAP) < 0) __PYX_ERR(0, 20, __pyx_L1_error)
 
-  /* "nsmr/obs/raycasting.pyx":17
- *         self.MAP_RESOLUTION = resolution
+  /* "nsmr/obs/raycasting.pyx":21
+ *         self.min_range = min_range
  *         self.MAP = MAP
  *         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]             # <<<<<<<<<<<<<<
  * 
  *     def process(self, list pose, double angle, list MAP=None):
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Length(__pyx_t_1); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_1 = PyInt_FromSsize_t(__pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_3, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_3, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_2 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Length(__pyx_t_4); if (unlikely(__pyx_t_2 == ((Py_ssize_t)-1))) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_4 = PyInt_FromSsize_t(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyList_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -1549,15 +1576,15 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(CYTHON_U
   PyList_SET_ITEM(__pyx_t_3, 1, __pyx_t_4);
   __pyx_t_1 = 0;
   __pyx_t_4 = 0;
-  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP_SIZE, __pyx_t_3) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
+  if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP_SIZE, __pyx_t_3) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":13
+  /* "nsmr/obs/raycasting.pyx":11
  * 
  * class Raycasting():
- *     def __init__(self, list MAP, double resolution):             # <<<<<<<<<<<<<<
- *         self.MAP_RESO = 1.0 / resolution
- *         self.MAP_RESOLUTION = resolution
+ *     def __init__(self,             # <<<<<<<<<<<<<<
+ *                  list MAP,
+ *                  double resolution,
  */
 
   /* function exit code */
@@ -1575,7 +1602,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting___init__(CYTHON_U
   return __pyx_r;
 }
 
-/* "nsmr/obs/raycasting.pyx":19
+/* "nsmr/obs/raycasting.pyx":23
  *         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
  * 
  *     def process(self, list pose, double angle, list MAP=None):             # <<<<<<<<<<<<<<
@@ -1625,13 +1652,13 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_3process(PyObject
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pose)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("process", 0, 3, 4, 1); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("process", 0, 3, 4, 1); __PYX_ERR(0, 23, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_angle)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("process", 0, 3, 4, 2); __PYX_ERR(0, 19, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("process", 0, 3, 4, 2); __PYX_ERR(0, 23, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -1641,7 +1668,7 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_3process(PyObject
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "process") < 0)) __PYX_ERR(0, 19, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "process") < 0)) __PYX_ERR(0, 23, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -1656,19 +1683,19 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_3process(PyObject
     }
     __pyx_v_self = values[0];
     __pyx_v_pose = ((PyObject*)values[1]);
-    __pyx_v_angle = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_angle == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 19, __pyx_L3_error)
+    __pyx_v_angle = __pyx_PyFloat_AsDouble(values[2]); if (unlikely((__pyx_v_angle == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 23, __pyx_L3_error)
     __pyx_v_MAP = ((PyObject*)values[3]);
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("process", 0, 3, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 19, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("process", 0, 3, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 23, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("nsmr.obs.raycasting.Raycasting.process", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pose), (&PyList_Type), 1, "pose", 1))) __PYX_ERR(0, 19, __pyx_L1_error)
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_MAP), (&PyList_Type), 1, "MAP", 1))) __PYX_ERR(0, 19, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pose), (&PyList_Type), 1, "pose", 1))) __PYX_ERR(0, 23, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_MAP), (&PyList_Type), 1, "MAP", 1))) __PYX_ERR(0, 23, __pyx_L1_error)
   __pyx_r = __pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(__pyx_self, __pyx_v_self, __pyx_v_pose, __pyx_v_angle, __pyx_v_MAP);
 
   /* function exit code */
@@ -1710,12 +1737,13 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   PyObject *__pyx_t_7 = NULL;
   double __pyx_t_8;
   int __pyx_t_9;
+  PyObject *__pyx_t_10 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("process", 0);
 
-  /* "nsmr/obs/raycasting.pyx":20
+  /* "nsmr/obs/raycasting.pyx":24
  * 
  *     def process(self, list pose, double angle, list MAP=None):
  *         if MAP is not None:             # <<<<<<<<<<<<<<
@@ -1726,16 +1754,16 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __pyx_t_2 = (__pyx_t_1 != 0);
   if (__pyx_t_2) {
 
-    /* "nsmr/obs/raycasting.pyx":21
+    /* "nsmr/obs/raycasting.pyx":25
  *     def process(self, list pose, double angle, list MAP=None):
  *         if MAP is not None:
  *             self.MAP= MAP             # <<<<<<<<<<<<<<
  *         cdef int x0, y0, x1, y1, dx, dy, error, derror, x_step, y_step, x, y, x_limit, _x, _y
  *         cdef list pose_ = [0 for _ in range(3)]
  */
-    if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP, __pyx_v_MAP) < 0) __PYX_ERR(0, 21, __pyx_L1_error)
+    if (__Pyx_PyObject_SetAttrStr(__pyx_v_self, __pyx_n_s_MAP, __pyx_v_MAP) < 0) __PYX_ERR(0, 25, __pyx_L1_error)
 
-    /* "nsmr/obs/raycasting.pyx":20
+    /* "nsmr/obs/raycasting.pyx":24
  * 
  *     def process(self, list pose, double angle, list MAP=None):
  *         if MAP is not None:             # <<<<<<<<<<<<<<
@@ -1744,163 +1772,163 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
   }
 
-  /* "nsmr/obs/raycasting.pyx":23
+  /* "nsmr/obs/raycasting.pyx":27
  *             self.MAP= MAP
  *         cdef int x0, y0, x1, y1, dx, dy, error, derror, x_step, y_step, x, y, x_limit, _x, _y
  *         cdef list pose_ = [0 for _ in range(3)]             # <<<<<<<<<<<<<<
  *         cdef steep
  *         x0 = int(pose[0]*self.MAP_RESO)
  */
-  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 27, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   for (__pyx_t_4 = 0; __pyx_t_4 < 3; __pyx_t_4+=1) {
     __pyx_v__ = __pyx_t_4;
-    if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_int_0))) __PYX_ERR(0, 23, __pyx_L1_error)
+    if (unlikely(__Pyx_ListComp_Append(__pyx_t_3, (PyObject*)__pyx_int_0))) __PYX_ERR(0, 27, __pyx_L1_error)
   }
   __pyx_v_pose_ = ((PyObject*)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":25
+  /* "nsmr/obs/raycasting.pyx":29
  *         cdef list pose_ = [0 for _ in range(3)]
  *         cdef steep
  *         x0 = int(pose[0]*self.MAP_RESO)             # <<<<<<<<<<<<<<
  *         y0 = int(pose[1]*self.MAP_RESO)
- *         x1 = int((pose[0]+MAX_RANGE * cos(pose[2]+angle))*self.MAP_RESO)
+ *         x1 = int((pose[0]+self.max_range * cos(pose[2]+angle))*self.MAP_RESO)
  */
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 25, __pyx_L1_error)
+    __PYX_ERR(0, 29, __pyx_L1_error)
   }
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = PyNumber_Multiply(PyList_GET_ITEM(__pyx_v_pose, 0), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Multiply(PyList_GET_ITEM(__pyx_v_pose, 0), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 25, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_x0 = __pyx_t_6;
 
-  /* "nsmr/obs/raycasting.pyx":26
+  /* "nsmr/obs/raycasting.pyx":30
  *         cdef steep
  *         x0 = int(pose[0]*self.MAP_RESO)
  *         y0 = int(pose[1]*self.MAP_RESO)             # <<<<<<<<<<<<<<
- *         x1 = int((pose[0]+MAX_RANGE * cos(pose[2]+angle))*self.MAP_RESO)
- *         y1 = int((pose[1]+MAX_RANGE * sin(pose[2]+angle))*self.MAP_RESO)
+ *         x1 = int((pose[0]+self.max_range * cos(pose[2]+angle))*self.MAP_RESO)
+ *         y1 = int((pose[1]+self.max_range * sin(pose[2]+angle))*self.MAP_RESO)
  */
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 26, __pyx_L1_error)
+    __PYX_ERR(0, 30, __pyx_L1_error)
   }
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = PyNumber_Multiply(PyList_GET_ITEM(__pyx_v_pose, 1), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Multiply(PyList_GET_ITEM(__pyx_v_pose, 1), __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 26, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_y0 = __pyx_t_6;
 
-  /* "nsmr/obs/raycasting.pyx":27
+  /* "nsmr/obs/raycasting.pyx":31
  *         x0 = int(pose[0]*self.MAP_RESO)
  *         y0 = int(pose[1]*self.MAP_RESO)
- *         x1 = int((pose[0]+MAX_RANGE * cos(pose[2]+angle))*self.MAP_RESO)             # <<<<<<<<<<<<<<
- *         y1 = int((pose[1]+MAX_RANGE * sin(pose[2]+angle))*self.MAP_RESO)
+ *         x1 = int((pose[0]+self.max_range * cos(pose[2]+angle))*self.MAP_RESO)             # <<<<<<<<<<<<<<
+ *         y1 = int((pose[1]+self.max_range * sin(pose[2]+angle))*self.MAP_RESO)
  *         steep = False
  */
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 27, __pyx_L1_error)
+    __PYX_ERR(0, 31, __pyx_L1_error)
   }
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_MAX_RANGE); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_max_range); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 27, __pyx_L1_error)
+    __PYX_ERR(0, 31, __pyx_L1_error)
   }
-  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_angle); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_5 = PyFloat_FromDouble(__pyx_v_angle); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 2), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 2), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyFloat_FromDouble(cos(__pyx_t_8)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(cos(__pyx_t_8)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_7); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 0), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 0), __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyNumber_Int(__pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 27, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 31, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_x1 = __pyx_t_6;
 
-  /* "nsmr/obs/raycasting.pyx":28
+  /* "nsmr/obs/raycasting.pyx":32
  *         y0 = int(pose[1]*self.MAP_RESO)
- *         x1 = int((pose[0]+MAX_RANGE * cos(pose[2]+angle))*self.MAP_RESO)
- *         y1 = int((pose[1]+MAX_RANGE * sin(pose[2]+angle))*self.MAP_RESO)             # <<<<<<<<<<<<<<
+ *         x1 = int((pose[0]+self.max_range * cos(pose[2]+angle))*self.MAP_RESO)
+ *         y1 = int((pose[1]+self.max_range * sin(pose[2]+angle))*self.MAP_RESO)             # <<<<<<<<<<<<<<
  *         steep = False
  *         if cabs(y1-y0) > cabs(x1-x0):
  */
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 28, __pyx_L1_error)
+    __PYX_ERR(0, 32, __pyx_L1_error)
   }
-  __Pyx_GetModuleGlobalName(__pyx_t_5, __pyx_n_s_MAX_RANGE); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_max_range); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 28, __pyx_L1_error)
+    __PYX_ERR(0, 32, __pyx_L1_error)
   }
-  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_angle); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_3 = PyFloat_FromDouble(__pyx_v_angle); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 2), __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 2), __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_t_7); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyFloat_FromDouble(sin(__pyx_t_8)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_7 = PyFloat_FromDouble(sin(__pyx_t_8)); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_3 = PyNumber_Multiply(__pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 1), __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_7 = PyNumber_Add(PyList_GET_ITEM(__pyx_v_pose, 1), __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESO); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_5 = PyNumber_Multiply(__pyx_t_7, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_5 = PyNumber_Multiply(__pyx_t_7, __pyx_t_3); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyNumber_Int(__pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 28, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 32, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_y1 = __pyx_t_6;
 
-  /* "nsmr/obs/raycasting.pyx":29
- *         x1 = int((pose[0]+MAX_RANGE * cos(pose[2]+angle))*self.MAP_RESO)
- *         y1 = int((pose[1]+MAX_RANGE * sin(pose[2]+angle))*self.MAP_RESO)
+  /* "nsmr/obs/raycasting.pyx":33
+ *         x1 = int((pose[0]+self.max_range * cos(pose[2]+angle))*self.MAP_RESO)
+ *         y1 = int((pose[1]+self.max_range * sin(pose[2]+angle))*self.MAP_RESO)
  *         steep = False             # <<<<<<<<<<<<<<
  *         if cabs(y1-y0) > cabs(x1-x0):
  *             steep = True
@@ -1908,19 +1936,19 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __Pyx_INCREF(Py_False);
   __pyx_v_steep = Py_False;
 
-  /* "nsmr/obs/raycasting.pyx":30
- *         y1 = int((pose[1]+MAX_RANGE * sin(pose[2]+angle))*self.MAP_RESO)
+  /* "nsmr/obs/raycasting.pyx":34
+ *         y1 = int((pose[1]+self.max_range * sin(pose[2]+angle))*self.MAP_RESO)
  *         steep = False
  *         if cabs(y1-y0) > cabs(x1-x0):             # <<<<<<<<<<<<<<
  *             steep = True
  *             x0, y0 = y0, x0
  */
-  __pyx_t_6 = abs((__pyx_v_y1 - __pyx_v_y0)); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 30, __pyx_L1_error)
-  __pyx_t_9 = abs((__pyx_v_x1 - __pyx_v_x0)); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(0, 30, __pyx_L1_error)
+  __pyx_t_6 = abs((__pyx_v_y1 - __pyx_v_y0)); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_t_9 = abs((__pyx_v_x1 - __pyx_v_x0)); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(0, 34, __pyx_L1_error)
   __pyx_t_2 = ((__pyx_t_6 > __pyx_t_9) != 0);
   if (__pyx_t_2) {
 
-    /* "nsmr/obs/raycasting.pyx":31
+    /* "nsmr/obs/raycasting.pyx":35
  *         steep = False
  *         if cabs(y1-y0) > cabs(x1-x0):
  *             steep = True             # <<<<<<<<<<<<<<
@@ -1930,7 +1958,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     __Pyx_INCREF(Py_True);
     __Pyx_DECREF_SET(__pyx_v_steep, Py_True);
 
-    /* "nsmr/obs/raycasting.pyx":32
+    /* "nsmr/obs/raycasting.pyx":36
  *         if cabs(y1-y0) > cabs(x1-x0):
  *             steep = True
  *             x0, y0 = y0, x0             # <<<<<<<<<<<<<<
@@ -1942,7 +1970,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     __pyx_v_x0 = __pyx_t_9;
     __pyx_v_y0 = __pyx_t_6;
 
-    /* "nsmr/obs/raycasting.pyx":33
+    /* "nsmr/obs/raycasting.pyx":37
  *             steep = True
  *             x0, y0 = y0, x0
  *             x1, y1 = y1, x1             # <<<<<<<<<<<<<<
@@ -1954,8 +1982,8 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     __pyx_v_x1 = __pyx_t_6;
     __pyx_v_y1 = __pyx_t_9;
 
-    /* "nsmr/obs/raycasting.pyx":30
- *         y1 = int((pose[1]+MAX_RANGE * sin(pose[2]+angle))*self.MAP_RESO)
+    /* "nsmr/obs/raycasting.pyx":34
+ *         y1 = int((pose[1]+self.max_range * sin(pose[2]+angle))*self.MAP_RESO)
  *         steep = False
  *         if cabs(y1-y0) > cabs(x1-x0):             # <<<<<<<<<<<<<<
  *             steep = True
@@ -1963,19 +1991,19 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
   }
 
-  /* "nsmr/obs/raycasting.pyx":34
+  /* "nsmr/obs/raycasting.pyx":38
  *             x0, y0 = y0, x0
  *             x1, y1 = y1, x1
  *         dx, dy = cabs(x1-x0), cabs(y1-y0)             # <<<<<<<<<<<<<<
  *         error, derror = 0, dy
  *         x, y = x0, y0
  */
-  __pyx_t_9 = abs((__pyx_v_x1 - __pyx_v_x0)); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(0, 34, __pyx_L1_error)
-  __pyx_t_6 = abs((__pyx_v_y1 - __pyx_v_y0)); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 34, __pyx_L1_error)
+  __pyx_t_9 = abs((__pyx_v_x1 - __pyx_v_x0)); if (unlikely(__pyx_t_9 == ((int)-1))) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_6 = abs((__pyx_v_y1 - __pyx_v_y0)); if (unlikely(__pyx_t_6 == ((int)-1))) __PYX_ERR(0, 38, __pyx_L1_error)
   __pyx_v_dx = __pyx_t_9;
   __pyx_v_dy = __pyx_t_6;
 
-  /* "nsmr/obs/raycasting.pyx":35
+  /* "nsmr/obs/raycasting.pyx":39
  *             x1, y1 = y1, x1
  *         dx, dy = cabs(x1-x0), cabs(y1-y0)
  *         error, derror = 0, dy             # <<<<<<<<<<<<<<
@@ -1987,7 +2015,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __pyx_v_error = __pyx_t_6;
   __pyx_v_derror = __pyx_t_9;
 
-  /* "nsmr/obs/raycasting.pyx":36
+  /* "nsmr/obs/raycasting.pyx":40
  *         dx, dy = cabs(x1-x0), cabs(y1-y0)
  *         error, derror = 0, dy
  *         x, y = x0, y0             # <<<<<<<<<<<<<<
@@ -1999,7 +2027,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __pyx_v_x = __pyx_t_9;
   __pyx_v_y = __pyx_t_6;
 
-  /* "nsmr/obs/raycasting.pyx":37
+  /* "nsmr/obs/raycasting.pyx":41
  *         error, derror = 0, dy
  *         x, y = x0, y0
  *         x_step, y_step = -1, -1             # <<<<<<<<<<<<<<
@@ -2011,7 +2039,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __pyx_v_x_step = __pyx_t_6;
   __pyx_v_y_step = __pyx_t_9;
 
-  /* "nsmr/obs/raycasting.pyx":38
+  /* "nsmr/obs/raycasting.pyx":42
  *         x, y = x0, y0
  *         x_step, y_step = -1, -1
  *         if x0<x1:             # <<<<<<<<<<<<<<
@@ -2021,7 +2049,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __pyx_t_2 = ((__pyx_v_x0 < __pyx_v_x1) != 0);
   if (__pyx_t_2) {
 
-    /* "nsmr/obs/raycasting.pyx":39
+    /* "nsmr/obs/raycasting.pyx":43
  *         x_step, y_step = -1, -1
  *         if x0<x1:
  *             x_step = 1             # <<<<<<<<<<<<<<
@@ -2030,7 +2058,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
     __pyx_v_x_step = 1;
 
-    /* "nsmr/obs/raycasting.pyx":38
+    /* "nsmr/obs/raycasting.pyx":42
  *         x, y = x0, y0
  *         x_step, y_step = -1, -1
  *         if x0<x1:             # <<<<<<<<<<<<<<
@@ -2039,7 +2067,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
   }
 
-  /* "nsmr/obs/raycasting.pyx":40
+  /* "nsmr/obs/raycasting.pyx":44
  *         if x0<x1:
  *             x_step = 1
  *         if y0<y1:             # <<<<<<<<<<<<<<
@@ -2049,7 +2077,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __pyx_t_2 = ((__pyx_v_y0 < __pyx_v_y1) != 0);
   if (__pyx_t_2) {
 
-    /* "nsmr/obs/raycasting.pyx":41
+    /* "nsmr/obs/raycasting.pyx":45
  *             x_step = 1
  *         if y0<y1:
  *             y_step = 1             # <<<<<<<<<<<<<<
@@ -2058,7 +2086,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
     __pyx_v_y_step = 1;
 
-    /* "nsmr/obs/raycasting.pyx":40
+    /* "nsmr/obs/raycasting.pyx":44
  *         if x0<x1:
  *             x_step = 1
  *         if y0<y1:             # <<<<<<<<<<<<<<
@@ -2067,48 +2095,48 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
   }
 
-  /* "nsmr/obs/raycasting.pyx":42
+  /* "nsmr/obs/raycasting.pyx":46
  *         if y0<y1:
  *             y_step = 1
  *         if steep:             # <<<<<<<<<<<<<<
  *             pose_[0] = y
  *             pose_[1] = x
  */
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_steep); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 42, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_steep); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 46, __pyx_L1_error)
   if (__pyx_t_2) {
 
-    /* "nsmr/obs/raycasting.pyx":43
+    /* "nsmr/obs/raycasting.pyx":47
  *             y_step = 1
  *         if steep:
  *             pose_[0] = y             # <<<<<<<<<<<<<<
  *             pose_[1] = x
  *             if not self.is_movable_grid(pose_):
  */
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 43, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 47, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_3, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
+    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_3, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 47, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "nsmr/obs/raycasting.pyx":44
+    /* "nsmr/obs/raycasting.pyx":48
  *         if steep:
  *             pose_[0] = y
  *             pose_[1] = x             # <<<<<<<<<<<<<<
  *             if not self.is_movable_grid(pose_):
  *                 _x = (x-x0)*(x-x0)
  */
-    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 44, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_3, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 44, __pyx_L1_error)
+    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_3, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-    /* "nsmr/obs/raycasting.pyx":45
+    /* "nsmr/obs/raycasting.pyx":49
  *             pose_[0] = y
  *             pose_[1] = x
  *             if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
  *                 _x = (x-x0)*(x-x0)
  *                 _y = (y-y0)*(y-y0)
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 49, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_7 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
@@ -2122,53 +2150,68 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     }
     __pyx_t_3 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_7, __pyx_v_pose_) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_pose_);
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 45, __pyx_L1_error)
+    if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 49, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 45, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 49, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_1 = ((!__pyx_t_2) != 0);
     if (__pyx_t_1) {
 
-      /* "nsmr/obs/raycasting.pyx":46
+      /* "nsmr/obs/raycasting.pyx":50
  *             pose_[1] = x
  *             if not self.is_movable_grid(pose_):
  *                 _x = (x-x0)*(x-x0)             # <<<<<<<<<<<<<<
  *                 _y = (y-y0)*(y-y0)
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  */
       __pyx_v__x = ((__pyx_v_x - __pyx_v_x0) * (__pyx_v_x - __pyx_v_x0));
 
-      /* "nsmr/obs/raycasting.pyx":47
+      /* "nsmr/obs/raycasting.pyx":51
  *             if not self.is_movable_grid(pose_):
  *                 _x = (x-x0)*(x-x0)
  *                 _y = (y-y0)*(y-y0)             # <<<<<<<<<<<<<<
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  *         else:
  */
       __pyx_v__y = ((__pyx_v_y - __pyx_v_y0) * (__pyx_v_y - __pyx_v_y0));
 
-      /* "nsmr/obs/raycasting.pyx":48
+      /* "nsmr/obs/raycasting.pyx":52
  *                 _x = (x-x0)*(x-x0)
  *                 _y = (y-y0)*(y-y0)
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION             # <<<<<<<<<<<<<<
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)             # <<<<<<<<<<<<<<
  *         else:
  *             pose_[0] = x
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_3 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 48, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_min_range); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 52, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
+      __pyx_t_5 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_7 = PyNumber_Multiply(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 48, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_10 = PyNumber_Multiply(__pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 52, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_10);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_5 = PyObject_RichCompare(__pyx_t_3, __pyx_t_10, Py_GT); __Pyx_XGOTREF(__pyx_t_5); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+      if (__pyx_t_1) {
+        __Pyx_INCREF(__pyx_t_3);
+        __pyx_t_7 = __pyx_t_3;
+      } else {
+        __Pyx_INCREF(__pyx_t_10);
+        __pyx_t_7 = __pyx_t_10;
+      }
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_INCREF(__pyx_t_7);
       __pyx_r = __pyx_t_7;
-      __pyx_t_7 = 0;
+      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       goto __pyx_L0;
 
-      /* "nsmr/obs/raycasting.pyx":45
+      /* "nsmr/obs/raycasting.pyx":49
  *             pose_[0] = y
  *             pose_[1] = x
  *             if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
@@ -2177,7 +2220,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
     }
 
-    /* "nsmr/obs/raycasting.pyx":42
+    /* "nsmr/obs/raycasting.pyx":46
  *         if y0<y1:
  *             y_step = 1
  *         if steep:             # <<<<<<<<<<<<<<
@@ -2187,99 +2230,114 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     goto __pyx_L9;
   }
 
-  /* "nsmr/obs/raycasting.pyx":50
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION
+  /* "nsmr/obs/raycasting.pyx":54
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  *         else:
  *             pose_[0] = x             # <<<<<<<<<<<<<<
  *             pose_[1] = y
  *             if not self.is_movable_grid(pose_):
  */
   /*else*/ {
-    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 50, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 54, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_7, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 50, __pyx_L1_error)
+    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_7, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 54, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "nsmr/obs/raycasting.pyx":51
+    /* "nsmr/obs/raycasting.pyx":55
  *         else:
  *             pose_[0] = x
  *             pose_[1] = y             # <<<<<<<<<<<<<<
  *             if not self.is_movable_grid(pose_):
  *                 _x = (x-x0)*(x-x0)
  */
-    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 51, __pyx_L1_error)
+    __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_7, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 51, __pyx_L1_error)
+    if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_7, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 55, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
 
-    /* "nsmr/obs/raycasting.pyx":52
+    /* "nsmr/obs/raycasting.pyx":56
  *             pose_[0] = x
  *             pose_[1] = y
  *             if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
  *                 _x = (x-x0)*(x-x0)
  *                 _y = (y-y0)*(y-y0)
  */
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 52, __pyx_L1_error)
-    __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_3 = NULL;
-    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
-      __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_5);
-      if (likely(__pyx_t_3)) {
-        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-        __Pyx_INCREF(__pyx_t_3);
+    __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 56, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    __pyx_t_10 = NULL;
+    if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_3))) {
+      __pyx_t_10 = PyMethod_GET_SELF(__pyx_t_3);
+      if (likely(__pyx_t_10)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
+        __Pyx_INCREF(__pyx_t_10);
         __Pyx_INCREF(function);
-        __Pyx_DECREF_SET(__pyx_t_5, function);
+        __Pyx_DECREF_SET(__pyx_t_3, function);
       }
     }
-    __pyx_t_7 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_3, __pyx_v_pose_) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_pose_);
-    __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-    if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __pyx_t_7 = (__pyx_t_10) ? __Pyx_PyObject_Call2Args(__pyx_t_3, __pyx_t_10, __pyx_v_pose_) : __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_v_pose_);
+    __Pyx_XDECREF(__pyx_t_10); __pyx_t_10 = 0;
+    if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 56, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_7);
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 52, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 56, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     __pyx_t_2 = ((!__pyx_t_1) != 0);
     if (__pyx_t_2) {
 
-      /* "nsmr/obs/raycasting.pyx":53
+      /* "nsmr/obs/raycasting.pyx":57
  *             pose_[1] = y
  *             if not self.is_movable_grid(pose_):
  *                 _x = (x-x0)*(x-x0)             # <<<<<<<<<<<<<<
  *                 _y = (y-y0)*(y-y0)
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  */
       __pyx_v__x = ((__pyx_v_x - __pyx_v_x0) * (__pyx_v_x - __pyx_v_x0));
 
-      /* "nsmr/obs/raycasting.pyx":54
+      /* "nsmr/obs/raycasting.pyx":58
  *             if not self.is_movable_grid(pose_):
  *                 _x = (x-x0)*(x-x0)
  *                 _y = (y-y0)*(y-y0)             # <<<<<<<<<<<<<<
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  *         x_limit = x1 + x_step
  */
       __pyx_v__y = ((__pyx_v_y - __pyx_v_y0) * (__pyx_v_y - __pyx_v_y0));
 
-      /* "nsmr/obs/raycasting.pyx":55
+      /* "nsmr/obs/raycasting.pyx":59
  *                 _x = (x-x0)*(x-x0)
  *                 _y = (y-y0)*(y-y0)
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION             # <<<<<<<<<<<<<<
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)             # <<<<<<<<<<<<<<
  *         x_limit = x1 + x_step
  *         while x != x_limit:
  */
       __Pyx_XDECREF(__pyx_r);
-      __pyx_t_7 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 55, __pyx_L1_error)
+      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_min_range); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 59, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 55, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_3 = PyNumber_Multiply(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 55, __pyx_L1_error)
+      __pyx_t_3 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 59, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_10);
+      __pyx_t_5 = PyNumber_Multiply(__pyx_t_3, __pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 59, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+      __pyx_t_3 = PyObject_RichCompare(__pyx_t_7, __pyx_t_5, Py_GT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 59, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 59, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      if (__pyx_t_2) {
+        __Pyx_INCREF(__pyx_t_7);
+        __pyx_t_10 = __pyx_t_7;
+      } else {
+        __Pyx_INCREF(__pyx_t_5);
+        __pyx_t_10 = __pyx_t_5;
+      }
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_r = __pyx_t_3;
-      __pyx_t_3 = 0;
+      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __Pyx_INCREF(__pyx_t_10);
+      __pyx_r = __pyx_t_10;
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       goto __pyx_L0;
 
-      /* "nsmr/obs/raycasting.pyx":52
+      /* "nsmr/obs/raycasting.pyx":56
  *             pose_[0] = x
  *             pose_[1] = y
  *             if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
@@ -2290,17 +2348,17 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   }
   __pyx_L9:;
 
-  /* "nsmr/obs/raycasting.pyx":56
+  /* "nsmr/obs/raycasting.pyx":60
  *                 _y = (y-y0)*(y-y0)
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  *         x_limit = x1 + x_step             # <<<<<<<<<<<<<<
  *         while x != x_limit:
  *             x = x + x_step
  */
   __pyx_v_x_limit = (__pyx_v_x1 + __pyx_v_x_step);
 
-  /* "nsmr/obs/raycasting.pyx":57
- *                 return sqrt(_x + _y) * self.MAP_RESOLUTION
+  /* "nsmr/obs/raycasting.pyx":61
+ *                 return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  *         x_limit = x1 + x_step
  *         while x != x_limit:             # <<<<<<<<<<<<<<
  *             x = x + x_step
@@ -2310,7 +2368,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     __pyx_t_2 = ((__pyx_v_x != __pyx_v_x_limit) != 0);
     if (!__pyx_t_2) break;
 
-    /* "nsmr/obs/raycasting.pyx":58
+    /* "nsmr/obs/raycasting.pyx":62
  *         x_limit = x1 + x_step
  *         while x != x_limit:
  *             x = x + x_step             # <<<<<<<<<<<<<<
@@ -2319,7 +2377,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
     __pyx_v_x = (__pyx_v_x + __pyx_v_x_step);
 
-    /* "nsmr/obs/raycasting.pyx":59
+    /* "nsmr/obs/raycasting.pyx":63
  *         while x != x_limit:
  *             x = x + x_step
  *             error = error + derror             # <<<<<<<<<<<<<<
@@ -2328,7 +2386,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
     __pyx_v_error = (__pyx_v_error + __pyx_v_derror);
 
-    /* "nsmr/obs/raycasting.pyx":60
+    /* "nsmr/obs/raycasting.pyx":64
  *             x = x + x_step
  *             error = error + derror
  *             if 2.0*error >= dx:             # <<<<<<<<<<<<<<
@@ -2338,7 +2396,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     __pyx_t_2 = (((2.0 * __pyx_v_error) >= __pyx_v_dx) != 0);
     if (__pyx_t_2) {
 
-      /* "nsmr/obs/raycasting.pyx":61
+      /* "nsmr/obs/raycasting.pyx":65
  *             error = error + derror
  *             if 2.0*error >= dx:
  *                 y = y + y_step             # <<<<<<<<<<<<<<
@@ -2347,7 +2405,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
       __pyx_v_y = (__pyx_v_y + __pyx_v_y_step);
 
-      /* "nsmr/obs/raycasting.pyx":62
+      /* "nsmr/obs/raycasting.pyx":66
  *             if 2.0*error >= dx:
  *                 y = y + y_step
  *                 error = error - dx             # <<<<<<<<<<<<<<
@@ -2356,7 +2414,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
       __pyx_v_error = (__pyx_v_error - __pyx_v_dx);
 
-      /* "nsmr/obs/raycasting.pyx":60
+      /* "nsmr/obs/raycasting.pyx":64
  *             x = x + x_step
  *             error = error + derror
  *             if 2.0*error >= dx:             # <<<<<<<<<<<<<<
@@ -2365,108 +2423,123 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
     }
 
-    /* "nsmr/obs/raycasting.pyx":63
+    /* "nsmr/obs/raycasting.pyx":67
  *                 y = y + y_step
  *                 error = error - dx
  *             if steep:             # <<<<<<<<<<<<<<
  *                 pose_[0] = y
  *                 pose_[1] = x
  */
-    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_steep); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 63, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_v_steep); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 67, __pyx_L1_error)
     if (__pyx_t_2) {
 
-      /* "nsmr/obs/raycasting.pyx":64
+      /* "nsmr/obs/raycasting.pyx":68
  *                 error = error - dx
  *             if steep:
  *                 pose_[0] = y             # <<<<<<<<<<<<<<
  *                 pose_[1] = x
  *                 if not self.is_movable_grid(pose_):
  */
-      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_3, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 64, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_10 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 68, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_10);
+      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_10, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 68, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-      /* "nsmr/obs/raycasting.pyx":65
+      /* "nsmr/obs/raycasting.pyx":69
  *             if steep:
  *                 pose_[0] = y
  *                 pose_[1] = x             # <<<<<<<<<<<<<<
  *                 if not self.is_movable_grid(pose_):
  *                     _x = (x-x0)*(x-x0)
  */
-      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_3, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 65, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_10 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 69, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_10);
+      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_10, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 69, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
 
-      /* "nsmr/obs/raycasting.pyx":66
+      /* "nsmr/obs/raycasting.pyx":70
  *                 pose_[0] = y
  *                 pose_[1] = x
  *                 if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
  *                     _x = (x-x0)*(x-x0)
  *                     _y = (y-y0)*(y-y0)
  */
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 66, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_5);
-      __pyx_t_7 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
-        __pyx_t_7 = PyMethod_GET_SELF(__pyx_t_5);
-        if (likely(__pyx_t_7)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
-          __Pyx_INCREF(__pyx_t_7);
+      __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 70, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_7);
+      __pyx_t_5 = NULL;
+      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_7))) {
+        __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_7);
+        if (likely(__pyx_t_5)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_7);
+          __Pyx_INCREF(__pyx_t_5);
           __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_5, function);
+          __Pyx_DECREF_SET(__pyx_t_7, function);
         }
       }
-      __pyx_t_3 = (__pyx_t_7) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_7, __pyx_v_pose_) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_pose_);
-      __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
-      if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 66, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 66, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_10 = (__pyx_t_5) ? __Pyx_PyObject_Call2Args(__pyx_t_7, __pyx_t_5, __pyx_v_pose_) : __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_v_pose_);
+      __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
+      if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 70, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_10);
+      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 70, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
       __pyx_t_1 = ((!__pyx_t_2) != 0);
       if (__pyx_t_1) {
 
-        /* "nsmr/obs/raycasting.pyx":67
+        /* "nsmr/obs/raycasting.pyx":71
  *                 pose_[1] = x
  *                 if not self.is_movable_grid(pose_):
  *                     _x = (x-x0)*(x-x0)             # <<<<<<<<<<<<<<
  *                     _y = (y-y0)*(y-y0)
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  */
         __pyx_v__x = ((__pyx_v_x - __pyx_v_x0) * (__pyx_v_x - __pyx_v_x0));
 
-        /* "nsmr/obs/raycasting.pyx":68
+        /* "nsmr/obs/raycasting.pyx":72
  *                 if not self.is_movable_grid(pose_):
  *                     _x = (x-x0)*(x-x0)
  *                     _y = (y-y0)*(y-y0)             # <<<<<<<<<<<<<<
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  *             else:
  */
         __pyx_v__y = ((__pyx_v_y - __pyx_v_y0) * (__pyx_v_y - __pyx_v_y0));
 
-        /* "nsmr/obs/raycasting.pyx":69
+        /* "nsmr/obs/raycasting.pyx":73
  *                     _x = (x-x0)*(x-x0)
  *                     _y = (y-y0)*(y-y0)
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION             # <<<<<<<<<<<<<<
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)             # <<<<<<<<<<<<<<
  *             else:
  *                 pose_[0] = x
  */
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_3 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 69, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_3);
-        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 69, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_7 = PyNumber_Multiply(__pyx_t_3, __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 69, __pyx_L1_error)
+        __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_min_range); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 73, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_10);
+        __pyx_t_7 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 73, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
-        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_5);
+        __pyx_t_3 = PyNumber_Multiply(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 73, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-        __pyx_r = __pyx_t_7;
-        __pyx_t_7 = 0;
+        __pyx_t_7 = PyObject_RichCompare(__pyx_t_10, __pyx_t_3, Py_GT); __Pyx_XGOTREF(__pyx_t_7); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 73, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 73, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+        if (__pyx_t_1) {
+          __Pyx_INCREF(__pyx_t_10);
+          __pyx_t_5 = __pyx_t_10;
+        } else {
+          __Pyx_INCREF(__pyx_t_3);
+          __pyx_t_5 = __pyx_t_3;
+        }
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+        __Pyx_INCREF(__pyx_t_5);
+        __pyx_r = __pyx_t_5;
+        __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
         goto __pyx_L0;
 
-        /* "nsmr/obs/raycasting.pyx":66
+        /* "nsmr/obs/raycasting.pyx":70
  *                 pose_[0] = y
  *                 pose_[1] = x
  *                 if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
@@ -2475,7 +2548,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
  */
       }
 
-      /* "nsmr/obs/raycasting.pyx":63
+      /* "nsmr/obs/raycasting.pyx":67
  *                 y = y + y_step
  *                 error = error - dx
  *             if steep:             # <<<<<<<<<<<<<<
@@ -2485,99 +2558,114 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
       goto __pyx_L15;
     }
 
-    /* "nsmr/obs/raycasting.pyx":71
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION
+    /* "nsmr/obs/raycasting.pyx":75
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  *             else:
  *                 pose_[0] = x             # <<<<<<<<<<<<<<
  *                 pose_[1] = y
  *                 if not self.is_movable_grid(pose_):
  */
     /*else*/ {
-      __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 71, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_7, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 71, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_x); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 0, __pyx_t_5, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "nsmr/obs/raycasting.pyx":72
+      /* "nsmr/obs/raycasting.pyx":76
  *             else:
  *                 pose_[0] = x
  *                 pose_[1] = y             # <<<<<<<<<<<<<<
  *                 if not self.is_movable_grid(pose_):
  *                     _x = (x-x0)*(x-x0)
  */
-      __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 72, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
-      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_7, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 72, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
+      __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_y); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      if (unlikely(__Pyx_SetItemInt(__pyx_v_pose_, 1, __pyx_t_5, long, 1, __Pyx_PyInt_From_long, 1, 0, 0) < 0)) __PYX_ERR(0, 76, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-      /* "nsmr/obs/raycasting.pyx":73
+      /* "nsmr/obs/raycasting.pyx":77
  *                 pose_[0] = x
  *                 pose_[1] = y
  *                 if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
  *                     _x = (x-x0)*(x-x0)
  *                     _y = (y-y0)*(y-y0)
  */
-      __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_5);
+      __pyx_t_10 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_is_movable_grid); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 77, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_10);
       __pyx_t_3 = NULL;
-      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_5))) {
-        __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_5);
+      if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_10))) {
+        __pyx_t_3 = PyMethod_GET_SELF(__pyx_t_10);
         if (likely(__pyx_t_3)) {
-          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_10);
           __Pyx_INCREF(__pyx_t_3);
           __Pyx_INCREF(function);
-          __Pyx_DECREF_SET(__pyx_t_5, function);
+          __Pyx_DECREF_SET(__pyx_t_10, function);
         }
       }
-      __pyx_t_7 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_5, __pyx_t_3, __pyx_v_pose_) : __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_v_pose_);
+      __pyx_t_5 = (__pyx_t_3) ? __Pyx_PyObject_Call2Args(__pyx_t_10, __pyx_t_3, __pyx_v_pose_) : __Pyx_PyObject_CallOneArg(__pyx_t_10, __pyx_v_pose_);
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
-      if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 73, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_7);
+      if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 77, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_5); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 77, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __pyx_t_1 = __Pyx_PyObject_IsTrue(__pyx_t_7); if (unlikely(__pyx_t_1 < 0)) __PYX_ERR(0, 73, __pyx_L1_error)
-      __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       __pyx_t_2 = ((!__pyx_t_1) != 0);
       if (__pyx_t_2) {
 
-        /* "nsmr/obs/raycasting.pyx":74
+        /* "nsmr/obs/raycasting.pyx":78
  *                 pose_[1] = y
  *                 if not self.is_movable_grid(pose_):
  *                     _x = (x-x0)*(x-x0)             # <<<<<<<<<<<<<<
  *                     _y = (y-y0)*(y-y0)
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
  */
         __pyx_v__x = ((__pyx_v_x - __pyx_v_x0) * (__pyx_v_x - __pyx_v_x0));
 
-        /* "nsmr/obs/raycasting.pyx":75
+        /* "nsmr/obs/raycasting.pyx":79
  *                 if not self.is_movable_grid(pose_):
  *                     _x = (x-x0)*(x-x0)
  *                     _y = (y-y0)*(y-y0)             # <<<<<<<<<<<<<<
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION
- *         return MAX_RANGE
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
+ *         return self.max_range
  */
         __pyx_v__y = ((__pyx_v_y - __pyx_v_y0) * (__pyx_v_y - __pyx_v_y0));
 
-        /* "nsmr/obs/raycasting.pyx":76
+        /* "nsmr/obs/raycasting.pyx":80
  *                     _x = (x-x0)*(x-x0)
  *                     _y = (y-y0)*(y-y0)
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION             # <<<<<<<<<<<<<<
- *         return MAX_RANGE
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)             # <<<<<<<<<<<<<<
+ *         return self.max_range
  * 
  */
         __Pyx_XDECREF(__pyx_r);
-        __pyx_t_7 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 76, __pyx_L1_error)
-        __Pyx_GOTREF(__pyx_t_7);
-        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+        __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_min_range); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
-        __pyx_t_3 = PyNumber_Multiply(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
+        __pyx_t_10 = PyFloat_FromDouble(sqrt((__pyx_v__x + __pyx_v__y))); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 80, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_10);
+        __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_RESOLUTION); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 80, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_3);
+        __pyx_t_7 = PyNumber_Multiply(__pyx_t_10, __pyx_t_3); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 80, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_7);
+        __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __pyx_t_10 = PyObject_RichCompare(__pyx_t_5, __pyx_t_7, Py_GT); __Pyx_XGOTREF(__pyx_t_10); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 80, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_10); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 80, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
+        if (__pyx_t_2) {
+          __Pyx_INCREF(__pyx_t_5);
+          __pyx_t_3 = __pyx_t_5;
+        } else {
+          __Pyx_INCREF(__pyx_t_7);
+          __pyx_t_3 = __pyx_t_7;
+        }
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+        __Pyx_INCREF(__pyx_t_3);
         __pyx_r = __pyx_t_3;
-        __pyx_t_3 = 0;
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
         goto __pyx_L0;
 
-        /* "nsmr/obs/raycasting.pyx":73
+        /* "nsmr/obs/raycasting.pyx":77
  *                 pose_[0] = x
  *                 pose_[1] = y
  *                 if not self.is_movable_grid(pose_):             # <<<<<<<<<<<<<<
@@ -2589,21 +2677,21 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
     __pyx_L15:;
   }
 
-  /* "nsmr/obs/raycasting.pyx":77
+  /* "nsmr/obs/raycasting.pyx":81
  *                     _y = (y-y0)*(y-y0)
- *                     return sqrt(_x + _y) * self.MAP_RESOLUTION
- *         return MAX_RANGE             # <<<<<<<<<<<<<<
+ *                     return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
+ *         return self.max_range             # <<<<<<<<<<<<<<
  * 
  *     def is_movable_grid(self, list pose):
  */
   __Pyx_XDECREF(__pyx_r);
-  __Pyx_GetModuleGlobalName(__pyx_t_3, __pyx_n_s_MAX_RANGE); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 77, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_max_range); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 81, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_r = __pyx_t_3;
   __pyx_t_3 = 0;
   goto __pyx_L0;
 
-  /* "nsmr/obs/raycasting.pyx":19
+  /* "nsmr/obs/raycasting.pyx":23
  *         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
  * 
  *     def process(self, list pose, double angle, list MAP=None):             # <<<<<<<<<<<<<<
@@ -2616,6 +2704,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_7);
+  __Pyx_XDECREF(__pyx_t_10);
   __Pyx_AddTraceback("nsmr.obs.raycasting.Raycasting.process", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   __pyx_L0:;
@@ -2626,8 +2715,8 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_2process(CYTHON_U
   return __pyx_r;
 }
 
-/* "nsmr/obs/raycasting.pyx":79
- *         return MAX_RANGE
+/* "nsmr/obs/raycasting.pyx":83
+ *         return self.max_range
  * 
  *     def is_movable_grid(self, list pose):             # <<<<<<<<<<<<<<
  *         i = int(pose[0])
@@ -2669,11 +2758,11 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_5is_movable_grid(
         case  1:
         if (likely((values[1] = __Pyx_PyDict_GetItemStr(__pyx_kwds, __pyx_n_s_pose)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("is_movable_grid", 1, 2, 2, 1); __PYX_ERR(0, 79, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("is_movable_grid", 1, 2, 2, 1); __PYX_ERR(0, 83, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "is_movable_grid") < 0)) __PYX_ERR(0, 79, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "is_movable_grid") < 0)) __PYX_ERR(0, 83, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -2686,13 +2775,13 @@ static PyObject *__pyx_pw_4nsmr_3obs_10raycasting_10Raycasting_5is_movable_grid(
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("is_movable_grid", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 79, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("is_movable_grid", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 83, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("nsmr.obs.raycasting.Raycasting.is_movable_grid", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pose), (&PyList_Type), 1, "pose", 1))) __PYX_ERR(0, 79, __pyx_L1_error)
+  if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_pose), (&PyList_Type), 1, "pose", 1))) __PYX_ERR(0, 83, __pyx_L1_error)
   __pyx_r = __pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(__pyx_self, __pyx_v_self, __pyx_v_pose);
 
   /* function exit code */
@@ -2720,7 +2809,7 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
   int __pyx_clineno = 0;
   __Pyx_RefNannySetupContext("is_movable_grid", 0);
 
-  /* "nsmr/obs/raycasting.pyx":80
+  /* "nsmr/obs/raycasting.pyx":84
  * 
  *     def is_movable_grid(self, list pose):
  *         i = int(pose[0])             # <<<<<<<<<<<<<<
@@ -2729,14 +2818,14 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
  */
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 80, __pyx_L1_error)
+    __PYX_ERR(0, 84, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_PyNumber_Int(PyList_GET_ITEM(__pyx_v_pose, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 80, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Int(PyList_GET_ITEM(__pyx_v_pose, 0)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 84, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_i = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":81
+  /* "nsmr/obs/raycasting.pyx":85
  *     def is_movable_grid(self, list pose):
  *         i = int(pose[0])
  *         j = int(pose[1])             # <<<<<<<<<<<<<<
@@ -2744,14 +2833,14 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
  */
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 81, __pyx_L1_error)
+    __PYX_ERR(0, 85, __pyx_L1_error)
   }
-  __pyx_t_1 = __Pyx_PyNumber_Int(PyList_GET_ITEM(__pyx_v_pose, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 81, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyNumber_Int(PyList_GET_ITEM(__pyx_v_pose, 1)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 85, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_v_j = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":82
+  /* "nsmr/obs/raycasting.pyx":86
  *         i = int(pose[0])
  *         j = int(pose[1])
  *         return (0 <= pose[0] < self.MAP_SIZE[0] and 0 <= pose[1] < self.MAP_SIZE[1] and self.MAP[i][j] == 0)             # <<<<<<<<<<<<<<
@@ -2759,23 +2848,23 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
   __Pyx_XDECREF(__pyx_r);
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 82, __pyx_L1_error)
+    __PYX_ERR(0, 86, __pyx_L1_error)
   }
   __pyx_t_2 = PyList_GET_ITEM(__pyx_v_pose, 0);
   __Pyx_INCREF(__pyx_t_2);
-  __pyx_t_3 = PyObject_RichCompare(__pyx_int_0, __pyx_t_2, Py_LE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_3 = PyObject_RichCompare(__pyx_int_0, __pyx_t_2, Py_LE); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
   if (__Pyx_PyObject_IsTrue(__pyx_t_3)) {
     __Pyx_DECREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_SIZE); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 82, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_SIZE); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 82, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_GetItemInt(__pyx_t_4, 0, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-    __pyx_t_3 = PyObject_RichCompare(__pyx_t_2, __pyx_t_5, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
+    __pyx_t_3 = PyObject_RichCompare(__pyx_t_2, __pyx_t_5, Py_LT); __Pyx_XGOTREF(__pyx_t_3); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 86, __pyx_L1_error)
   if (__pyx_t_6) {
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   } else {
@@ -2786,23 +2875,23 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
   }
   if (unlikely(__pyx_v_pose == Py_None)) {
     PyErr_SetString(PyExc_TypeError, "'NoneType' object is not subscriptable");
-    __PYX_ERR(0, 82, __pyx_L1_error)
+    __PYX_ERR(0, 86, __pyx_L1_error)
   }
   __pyx_t_3 = PyList_GET_ITEM(__pyx_v_pose, 1);
   __Pyx_INCREF(__pyx_t_3);
-  __pyx_t_2 = PyObject_RichCompare(__pyx_int_0, __pyx_t_3, Py_LE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_2 = PyObject_RichCompare(__pyx_int_0, __pyx_t_3, Py_LE); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   if (__Pyx_PyObject_IsTrue(__pyx_t_2)) {
     __Pyx_DECREF(__pyx_t_2);
-    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_SIZE); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 82, __pyx_L1_error)
+    __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP_SIZE); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
-    __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_5, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 82, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_GetItemInt(__pyx_t_5, 1, long, 1, __Pyx_PyInt_From_long, 0, 0, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __pyx_t_2 = PyObject_RichCompare(__pyx_t_3, __pyx_t_4, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
+    __pyx_t_2 = PyObject_RichCompare(__pyx_t_3, __pyx_t_4, Py_LT); __Pyx_XGOTREF(__pyx_t_2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_6 < 0)) __PYX_ERR(0, 86, __pyx_L1_error)
   if (__pyx_t_6) {
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
@@ -2811,15 +2900,15 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     goto __pyx_L3_bool_binop_done;
   }
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_self, __pyx_n_s_MAP); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetItem(__pyx_t_2, __pyx_v_i); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_t_3, __pyx_v_j); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetItem(__pyx_t_3, __pyx_v_j); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_t_2, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 82, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_t_2, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_INCREF(__pyx_t_3);
@@ -2830,8 +2919,8 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "nsmr/obs/raycasting.pyx":79
- *         return MAX_RANGE
+  /* "nsmr/obs/raycasting.pyx":83
+ *         return self.max_range
  * 
  *     def is_movable_grid(self, list pose):             # <<<<<<<<<<<<<<
  *         i = int(pose[0])
@@ -2858,135 +2947,6 @@ static PyObject *__pyx_pf_4nsmr_3obs_10raycasting_10Raycasting_4is_movable_grid(
 static PyMethodDef __pyx_methods[] = {
   {0, 0, 0, 0}
 };
-
-static int __pyx_import_star_set(PyObject *o, PyObject* py_name, char *name) {
-  static const char* internal_type_names[] = {
-    "__pyx_ctuple_long",
-    "__pyx_ctuple_long_struct",
-    0
-  };
-  const char** type_name = internal_type_names;
-  while (*type_name) {
-    if (__Pyx_StrEq(name, *type_name)) {
-      PyErr_Format(PyExc_TypeError, "Cannot overwrite C type %s", name);
-      goto bad;
-    }
-    type_name++;
-  }
-  if (0);
-  else {
-    if (PyObject_SetAttr(__pyx_m, py_name, o) < 0) goto bad;
-  }
-  return 0;
-  bad:
-  return -1;
-}
-
-static int
-__Pyx_import_all_from(PyObject *locals, PyObject *v)
-{
-    PyObject *all = PyObject_GetAttrString(v, "__all__");
-    PyObject *dict, *name, *value;
-    int skip_leading_underscores = 0;
-    int pos, err;
-    if (all == NULL) {
-        if (!PyErr_ExceptionMatches(PyExc_AttributeError))
-            return -1;
-        PyErr_Clear();
-        dict = PyObject_GetAttrString(v, "__dict__");
-        if (dict == NULL) {
-            if (!PyErr_ExceptionMatches(PyExc_AttributeError))
-                return -1;
-            PyErr_SetString(PyExc_ImportError,
-            "from-import-* object has no __dict__ and no __all__");
-            return -1;
-        }
-#if PY_MAJOR_VERSION < 3
-        all = PyObject_CallMethod(dict, (char *)"keys", NULL);
-#else
-        all = PyMapping_Keys(dict);
-#endif
-        Py_DECREF(dict);
-        if (all == NULL)
-            return -1;
-        skip_leading_underscores = 1;
-    }
-    for (pos = 0, err = 0; ; pos++) {
-        name = PySequence_GetItem(all, pos);
-        if (name == NULL) {
-            if (!PyErr_ExceptionMatches(PyExc_IndexError))
-                err = -1;
-            else
-                PyErr_Clear();
-            break;
-        }
-        if (skip_leading_underscores &&
-#if PY_MAJOR_VERSION < 3
-            PyString_Check(name) &&
-            PyString_AS_STRING(name)[0] == '_')
-#else
-            PyUnicode_Check(name) &&
-            PyUnicode_AS_UNICODE(name)[0] == '_')
-#endif
-        {
-            Py_DECREF(name);
-            continue;
-        }
-        value = PyObject_GetAttr(v, name);
-        if (value == NULL)
-            err = -1;
-        else if (PyDict_CheckExact(locals))
-            err = PyDict_SetItem(locals, name, value);
-        else
-            err = PyObject_SetItem(locals, name, value);
-        Py_DECREF(name);
-        Py_XDECREF(value);
-        if (err != 0)
-            break;
-    }
-    Py_DECREF(all);
-    return err;
-}
-static int __pyx_import_star(PyObject* m) {
-    int i;
-    int ret = -1;
-    char* s;
-    PyObject *locals = 0;
-    PyObject *list = 0;
-#if PY_MAJOR_VERSION >= 3
-    PyObject *utf8_name = 0;
-#endif
-    PyObject *name;
-    PyObject *item;
-    locals = PyDict_New();              if (!locals) goto bad;
-    if (__Pyx_import_all_from(locals, m) < 0) goto bad;
-    list = PyDict_Items(locals);        if (!list) goto bad;
-    for(i=0; i<PyList_GET_SIZE(list); i++) {
-        name = PyTuple_GET_ITEM(PyList_GET_ITEM(list, i), 0);
-        item = PyTuple_GET_ITEM(PyList_GET_ITEM(list, i), 1);
-#if PY_MAJOR_VERSION >= 3
-        utf8_name = PyUnicode_AsUTF8String(name);
-        if (!utf8_name) goto bad;
-        s = PyBytes_AS_STRING(utf8_name);
-        if (__pyx_import_star_set(item, name, s) < 0) goto bad;
-        Py_DECREF(utf8_name); utf8_name = 0;
-#else
-        s = PyString_AsString(name);
-        if (!s) goto bad;
-        if (__pyx_import_star_set(item, name, s) < 0) goto bad;
-#endif
-    }
-    ret = 0;
-bad:
-    Py_XDECREF(locals);
-    Py_XDECREF(list);
-#if PY_MAJOR_VERSION >= 3
-    Py_XDECREF(utf8_name);
-#endif
-    return ret;
-}
-
-
 
 #if PY_MAJOR_VERSION >= 3
 #if CYTHON_PEP489_MULTI_PHASE_INIT
@@ -3030,17 +2990,15 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
-  {&__pyx_n_s_, __pyx_k_, sizeof(__pyx_k_), 0, 0, 1, 1},
   {&__pyx_n_s_MAP, __pyx_k_MAP, sizeof(__pyx_k_MAP), 0, 0, 1, 1},
   {&__pyx_n_s_MAP_RESO, __pyx_k_MAP_RESO, sizeof(__pyx_k_MAP_RESO), 0, 0, 1, 1},
   {&__pyx_n_s_MAP_RESOLUTION, __pyx_k_MAP_RESOLUTION, sizeof(__pyx_k_MAP_RESOLUTION), 0, 0, 1, 1},
   {&__pyx_n_s_MAP_SIZE, __pyx_k_MAP_SIZE, sizeof(__pyx_k_MAP_SIZE), 0, 0, 1, 1},
-  {&__pyx_n_s_MAX_RANGE, __pyx_k_MAX_RANGE, sizeof(__pyx_k_MAX_RANGE), 0, 0, 1, 1},
   {&__pyx_n_s_Raycasting, __pyx_k_Raycasting, sizeof(__pyx_k_Raycasting), 0, 0, 1, 1},
   {&__pyx_n_s_Raycasting___init, __pyx_k_Raycasting___init, sizeof(__pyx_k_Raycasting___init), 0, 0, 1, 1},
   {&__pyx_n_s_Raycasting_is_movable_grid, __pyx_k_Raycasting_is_movable_grid, sizeof(__pyx_k_Raycasting_is_movable_grid), 0, 0, 1, 1},
   {&__pyx_n_s_Raycasting_process, __pyx_k_Raycasting_process, sizeof(__pyx_k_Raycasting_process), 0, 0, 1, 1},
-  {&__pyx_n_s__4, __pyx_k__4, sizeof(__pyx_k__4), 0, 0, 1, 1},
+  {&__pyx_n_s__3, __pyx_k__3, sizeof(__pyx_k__3), 0, 0, 1, 1},
   {&__pyx_n_s_angle, __pyx_k_angle, sizeof(__pyx_k_angle), 0, 0, 1, 1},
   {&__pyx_n_s_cline_in_traceback, __pyx_k_cline_in_traceback, sizeof(__pyx_k_cline_in_traceback), 0, 0, 1, 1},
   {&__pyx_n_s_derror, __pyx_k_derror, sizeof(__pyx_k_derror), 0, 0, 1, 1},
@@ -3055,10 +3013,11 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_j, __pyx_k_j, sizeof(__pyx_k_j), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_n_s_math, __pyx_k_math, sizeof(__pyx_k_math), 0, 0, 1, 1},
+  {&__pyx_n_s_max_range, __pyx_k_max_range, sizeof(__pyx_k_max_range), 0, 0, 1, 1},
   {&__pyx_n_s_metaclass, __pyx_k_metaclass, sizeof(__pyx_k_metaclass), 0, 0, 1, 1},
+  {&__pyx_n_s_min_range, __pyx_k_min_range, sizeof(__pyx_k_min_range), 0, 0, 1, 1},
   {&__pyx_n_s_module, __pyx_k_module, sizeof(__pyx_k_module), 0, 0, 1, 1},
   {&__pyx_n_s_name, __pyx_k_name, sizeof(__pyx_k_name), 0, 0, 1, 1},
-  {&__pyx_n_s_nsmr_envs_consts, __pyx_k_nsmr_envs_consts, sizeof(__pyx_k_nsmr_envs_consts), 0, 0, 1, 1},
   {&__pyx_n_s_nsmr_obs_raycasting, __pyx_k_nsmr_obs_raycasting, sizeof(__pyx_k_nsmr_obs_raycasting), 0, 0, 1, 1},
   {&__pyx_kp_s_nsmr_obs_raycasting_pyx, __pyx_k_nsmr_obs_raycasting_pyx, sizeof(__pyx_k_nsmr_obs_raycasting_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_pose, __pyx_k_pose, sizeof(__pyx_k_pose), 0, 0, 1, 1},
@@ -3085,7 +3044,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static CYTHON_SMALL_CODE int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 27, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -3095,44 +3054,44 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "nsmr/obs/raycasting.pyx":13
+  /* "nsmr/obs/raycasting.pyx":11
  * 
  * class Raycasting():
- *     def __init__(self, list MAP, double resolution):             # <<<<<<<<<<<<<<
- *         self.MAP_RESO = 1.0 / resolution
- *         self.MAP_RESOLUTION = resolution
+ *     def __init__(self,             # <<<<<<<<<<<<<<
+ *                  list MAP,
+ *                  double resolution,
  */
-  __pyx_tuple__2 = PyTuple_Pack(3, __pyx_n_s_self, __pyx_n_s_MAP, __pyx_n_s_resolution); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 13, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__2);
-  __Pyx_GIVEREF(__pyx_tuple__2);
-  __pyx_codeobj__3 = (PyObject*)__Pyx_PyCode_New(3, 0, 3, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__2, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_nsmr_obs_raycasting_pyx, __pyx_n_s_init, 13, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__3)) __PYX_ERR(0, 13, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(5, __pyx_n_s_self, __pyx_n_s_MAP, __pyx_n_s_resolution, __pyx_n_s_max_range, __pyx_n_s_min_range); if (unlikely(!__pyx_tuple_)) __PYX_ERR(0, 11, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple_);
+  __Pyx_GIVEREF(__pyx_tuple_);
+  __pyx_codeobj__2 = (PyObject*)__Pyx_PyCode_New(5, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple_, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_nsmr_obs_raycasting_pyx, __pyx_n_s_init, 11, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__2)) __PYX_ERR(0, 11, __pyx_L1_error)
 
-  /* "nsmr/obs/raycasting.pyx":19
+  /* "nsmr/obs/raycasting.pyx":23
  *         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
  * 
  *     def process(self, list pose, double angle, list MAP=None):             # <<<<<<<<<<<<<<
  *         if MAP is not None:
  *             self.MAP= MAP
  */
-  __pyx_tuple__5 = PyTuple_Pack(22, __pyx_n_s_self, __pyx_n_s_pose, __pyx_n_s_angle, __pyx_n_s_MAP, __pyx_n_s_x0, __pyx_n_s_y0, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_dx, __pyx_n_s_dy, __pyx_n_s_error, __pyx_n_s_derror, __pyx_n_s_x_step, __pyx_n_s_y_step, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_x_limit, __pyx_n_s_x_2, __pyx_n_s_y_2, __pyx_n_s_pose_2, __pyx_n_s_steep, __pyx_n_s__4); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 19, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__5);
-  __Pyx_GIVEREF(__pyx_tuple__5);
-  __pyx_codeobj__6 = (PyObject*)__Pyx_PyCode_New(4, 0, 22, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__5, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_nsmr_obs_raycasting_pyx, __pyx_n_s_process, 19, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__6)) __PYX_ERR(0, 19, __pyx_L1_error)
-  __pyx_tuple__7 = PyTuple_Pack(1, ((PyObject *)Py_None)); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 19, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__7);
-  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_tuple__4 = PyTuple_Pack(22, __pyx_n_s_self, __pyx_n_s_pose, __pyx_n_s_angle, __pyx_n_s_MAP, __pyx_n_s_x0, __pyx_n_s_y0, __pyx_n_s_x1, __pyx_n_s_y1, __pyx_n_s_dx, __pyx_n_s_dy, __pyx_n_s_error, __pyx_n_s_derror, __pyx_n_s_x_step, __pyx_n_s_y_step, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_x_limit, __pyx_n_s_x_2, __pyx_n_s_y_2, __pyx_n_s_pose_2, __pyx_n_s_steep, __pyx_n_s__3); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__4);
+  __Pyx_GIVEREF(__pyx_tuple__4);
+  __pyx_codeobj__5 = (PyObject*)__Pyx_PyCode_New(4, 0, 22, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__4, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_nsmr_obs_raycasting_pyx, __pyx_n_s_process, 23, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__5)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(1, ((PyObject *)Py_None)); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__6);
+  __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "nsmr/obs/raycasting.pyx":79
- *         return MAX_RANGE
+  /* "nsmr/obs/raycasting.pyx":83
+ *         return self.max_range
  * 
  *     def is_movable_grid(self, list pose):             # <<<<<<<<<<<<<<
  *         i = int(pose[0])
  *         j = int(pose[1])
  */
-  __pyx_tuple__8 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_pose, __pyx_n_s_i, __pyx_n_s_j); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 79, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_tuple__8);
-  __Pyx_GIVEREF(__pyx_tuple__8);
-  __pyx_codeobj__9 = (PyObject*)__Pyx_PyCode_New(2, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__8, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_nsmr_obs_raycasting_pyx, __pyx_n_s_is_movable_grid, 79, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__9)) __PYX_ERR(0, 79, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(4, __pyx_n_s_self, __pyx_n_s_pose, __pyx_n_s_i, __pyx_n_s_j); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 83, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_tuple__7);
+  __Pyx_GIVEREF(__pyx_tuple__7);
+  __pyx_codeobj__8 = (PyObject*)__Pyx_PyCode_New(2, 0, 4, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__7, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_nsmr_obs_raycasting_pyx, __pyx_n_s_is_movable_grid, 83, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__8)) __PYX_ERR(0, 83, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -3308,6 +3267,7 @@ static CYTHON_SMALL_CODE int __pyx_pymod_exec_raycasting(PyObject *__pyx_pyinit_
 {
   PyObject *__pyx_t_1 = NULL;
   PyObject *__pyx_t_2 = NULL;
+  PyObject *__pyx_t_3 = NULL;
   int __pyx_lineno = 0;
   const char *__pyx_filename = NULL;
   int __pyx_clineno = 0;
@@ -3425,93 +3385,92 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_math, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":7
- * from libc.math cimport abs as cabs
- * 
- * from nsmr.envs.consts import *             # <<<<<<<<<<<<<<
- * 
- * @cython.boundscheck(False)
- */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_INCREF(__pyx_n_s_);
-  __Pyx_GIVEREF(__pyx_n_s_);
-  PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_nsmr_envs_consts, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  if (__pyx_import_star(__pyx_t_2) < 0) __PYX_ERR(0, 7, __pyx_L1_error);
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-
-  /* "nsmr/obs/raycasting.pyx":12
+  /* "nsmr/obs/raycasting.pyx":10
  * @cython.wraparound(False)
  * 
  * class Raycasting():             # <<<<<<<<<<<<<<
- *     def __init__(self, list MAP, double resolution):
- *         self.MAP_RESO = 1.0 / resolution
+ *     def __init__(self,
+ *                  list MAP,
  */
-  __pyx_t_2 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_Raycasting, __pyx_n_s_Raycasting, (PyObject *) NULL, __pyx_n_s_nsmr_obs_raycasting, (PyObject *) NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 12, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
+  __pyx_t_1 = __Pyx_Py3MetaclassPrepare((PyObject *) NULL, __pyx_empty_tuple, __pyx_n_s_Raycasting, __pyx_n_s_Raycasting, (PyObject *) NULL, __pyx_n_s_nsmr_obs_raycasting, (PyObject *) NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
 
-  /* "nsmr/obs/raycasting.pyx":13
- * 
- * class Raycasting():
- *     def __init__(self, list MAP, double resolution):             # <<<<<<<<<<<<<<
+  /* "nsmr/obs/raycasting.pyx":15
+ *                  double resolution,
+ *                  double max_range,
+ *                  double min_range=0.0):             # <<<<<<<<<<<<<<
  *         self.MAP_RESO = 1.0 / resolution
  *         self.MAP_RESOLUTION = resolution
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_4nsmr_3obs_10raycasting_10Raycasting_1__init__, 0, __pyx_n_s_Raycasting___init, NULL, __pyx_n_s_nsmr_obs_raycasting, __pyx_d, ((PyObject *)__pyx_codeobj__3)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 13, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_init, __pyx_t_1) < 0) __PYX_ERR(0, 13, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = PyFloat_FromDouble(((double)0.0)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 15, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
 
-  /* "nsmr/obs/raycasting.pyx":19
+  /* "nsmr/obs/raycasting.pyx":11
+ * 
+ * class Raycasting():
+ *     def __init__(self,             # <<<<<<<<<<<<<<
+ *                  list MAP,
+ *                  double resolution,
+ */
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 11, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_3);
+  __Pyx_GIVEREF(__pyx_t_2);
+  PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
+  __pyx_t_2 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_4nsmr_3obs_10raycasting_10Raycasting_1__init__, 0, __pyx_n_s_Raycasting___init, NULL, __pyx_n_s_nsmr_obs_raycasting, __pyx_d, ((PyObject *)__pyx_codeobj__2)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 11, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_t_3);
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_init, __pyx_t_2) < 0) __PYX_ERR(0, 11, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+
+  /* "nsmr/obs/raycasting.pyx":23
  *         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
  * 
  *     def process(self, list pose, double angle, list MAP=None):             # <<<<<<<<<<<<<<
  *         if MAP is not None:
  *             self.MAP= MAP
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_4nsmr_3obs_10raycasting_10Raycasting_3process, 0, __pyx_n_s_Raycasting_process, NULL, __pyx_n_s_nsmr_obs_raycasting, __pyx_d, ((PyObject *)__pyx_codeobj__6)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 19, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_1, __pyx_tuple__7);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_process, __pyx_t_1) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_4nsmr_3obs_10raycasting_10Raycasting_3process, 0, __pyx_n_s_Raycasting_process, NULL, __pyx_n_s_nsmr_obs_raycasting, __pyx_d, ((PyObject *)__pyx_codeobj__5)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 23, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  __Pyx_CyFunction_SetDefaultsTuple(__pyx_t_2, __pyx_tuple__6);
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_process, __pyx_t_2) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":79
- *         return MAX_RANGE
+  /* "nsmr/obs/raycasting.pyx":83
+ *         return self.max_range
  * 
  *     def is_movable_grid(self, list pose):             # <<<<<<<<<<<<<<
  *         i = int(pose[0])
  *         j = int(pose[1])
  */
-  __pyx_t_1 = __Pyx_CyFunction_New(&__pyx_mdef_4nsmr_3obs_10raycasting_10Raycasting_5is_movable_grid, 0, __pyx_n_s_Raycasting_is_movable_grid, NULL, __pyx_n_s_nsmr_obs_raycasting, __pyx_d, ((PyObject *)__pyx_codeobj__9)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 79, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (__Pyx_SetNameInClass(__pyx_t_2, __pyx_n_s_is_movable_grid, __pyx_t_1) < 0) __PYX_ERR(0, 79, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_CyFunction_New(&__pyx_mdef_4nsmr_3obs_10raycasting_10Raycasting_5is_movable_grid, 0, __pyx_n_s_Raycasting_is_movable_grid, NULL, __pyx_n_s_nsmr_obs_raycasting, __pyx_d, ((PyObject *)__pyx_codeobj__8)); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 83, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (__Pyx_SetNameInClass(__pyx_t_1, __pyx_n_s_is_movable_grid, __pyx_t_2) < 0) __PYX_ERR(0, 83, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "nsmr/obs/raycasting.pyx":12
+  /* "nsmr/obs/raycasting.pyx":10
  * @cython.wraparound(False)
  * 
  * class Raycasting():             # <<<<<<<<<<<<<<
- *     def __init__(self, list MAP, double resolution):
- *         self.MAP_RESO = 1.0 / resolution
+ *     def __init__(self,
+ *                  list MAP,
  */
-  __pyx_t_1 = __Pyx_Py3ClassCreate(((PyObject*)&__Pyx_DefaultClassType), __pyx_n_s_Raycasting, __pyx_empty_tuple, __pyx_t_2, NULL, 0, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 12, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Raycasting, __pyx_t_1) < 0) __PYX_ERR(0, 12, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+  __pyx_t_2 = __Pyx_Py3ClassCreate(((PyObject*)&__Pyx_DefaultClassType), __pyx_n_s_Raycasting, __pyx_empty_tuple, __pyx_t_1, NULL, 0, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 10, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_2);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_Raycasting, __pyx_t_2) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "nsmr/obs/raycasting.pyx":1
  * import math             # <<<<<<<<<<<<<<
  * 
  * cimport cython
  */
-  __pyx_t_2 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_2) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+  __pyx_t_1 = __Pyx_PyDict_NewPresized(0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_1);
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /*--- Wrapped vars code ---*/
 
@@ -3519,6 +3478,7 @@ if (!__Pyx_RefNanny) {
   __pyx_L1_error:;
   __Pyx_XDECREF(__pyx_t_1);
   __Pyx_XDECREF(__pyx_t_2);
+  __Pyx_XDECREF(__pyx_t_3);
   if (__pyx_m) {
     if (__pyx_d) {
       __Pyx_AddTraceback("init nsmr.obs.raycasting", __pyx_clineno, __pyx_lineno, __pyx_filename);
@@ -3846,67 +3806,6 @@ static CYTHON_INLINE PyObject *__Pyx_GetItemInt_Fast(PyObject *o, Py_ssize_t i, 
     }
 #endif
     return __Pyx_GetItemInt_Generic(o, PyInt_FromSsize_t(i));
-}
-
-/* PyDictVersioning */
-#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
-}
-static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
-    PyObject **dictptr = NULL;
-    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
-    if (offset) {
-#if CYTHON_COMPILING_IN_CPYTHON
-        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
-#else
-        dictptr = _PyObject_GetDictPtr(obj);
-#endif
-    }
-    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
-}
-static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
-    PyObject *dict = Py_TYPE(obj)->tp_dict;
-    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
-        return 0;
-    return obj_dict_version == __Pyx_get_object_dict_version(obj);
-}
-#endif
-
-/* GetModuleGlobalName */
-#if CYTHON_USE_DICT_VERSIONS
-static PyObject *__Pyx__GetModuleGlobalName(PyObject *name, PY_UINT64_T *dict_version, PyObject **dict_cached_value)
-#else
-static CYTHON_INLINE PyObject *__Pyx__GetModuleGlobalName(PyObject *name)
-#endif
-{
-    PyObject *result;
-#if !CYTHON_AVOID_BORROWED_REFS
-#if CYTHON_COMPILING_IN_CPYTHON && PY_VERSION_HEX >= 0x030500A1
-    result = _PyDict_GetItem_KnownHash(__pyx_d, name, ((PyASCIIObject *) name)->hash);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    } else if (unlikely(PyErr_Occurred())) {
-        return NULL;
-    }
-#else
-    result = PyDict_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-#endif
-#else
-    result = PyObject_GetItem(__pyx_d, name);
-    __PYX_UPDATE_DICT_CACHE(__pyx_d, result, *dict_cached_value, *dict_version)
-    if (likely(result)) {
-        return __Pyx_NewRef(result);
-    }
-    PyErr_Clear();
-#endif
-    return __Pyx_GetBuiltinName(name);
 }
 
 /* SetItemInt */
@@ -5130,6 +5029,32 @@ static PyObject *__Pyx_Py3ClassCreate(PyObject *metaclass, PyObject *name, PyObj
     return result;
 }
 
+/* PyDictVersioning */
+#if CYTHON_USE_DICT_VERSIONS && CYTHON_USE_TYPE_SLOTS
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_tp_dict_version(PyObject *obj) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    return likely(dict) ? __PYX_GET_DICT_VERSION(dict) : 0;
+}
+static CYTHON_INLINE PY_UINT64_T __Pyx_get_object_dict_version(PyObject *obj) {
+    PyObject **dictptr = NULL;
+    Py_ssize_t offset = Py_TYPE(obj)->tp_dictoffset;
+    if (offset) {
+#if CYTHON_COMPILING_IN_CPYTHON
+        dictptr = (likely(offset > 0)) ? (PyObject **) ((char *)obj + offset) : _PyObject_GetDictPtr(obj);
+#else
+        dictptr = _PyObject_GetDictPtr(obj);
+#endif
+    }
+    return (dictptr && *dictptr) ? __PYX_GET_DICT_VERSION(*dictptr) : 0;
+}
+static CYTHON_INLINE int __Pyx_object_dict_version_matches(PyObject* obj, PY_UINT64_T tp_dict_version, PY_UINT64_T obj_dict_version) {
+    PyObject *dict = Py_TYPE(obj)->tp_dict;
+    if (unlikely(!dict) || unlikely(tp_dict_version != __PYX_GET_DICT_VERSION(dict)))
+        return 0;
+    return obj_dict_version == __Pyx_get_object_dict_version(obj);
+}
+#endif
+
 /* PyErrFetchRestore */
 #if CYTHON_FAST_THREAD_STATE
 static CYTHON_INLINE void __Pyx_ErrRestoreInState(PyThreadState *tstate, PyObject *type, PyObject *value, PyObject *tb) {
@@ -5922,12 +5847,6 @@ static CYTHON_INLINE int __Pyx_PyErr_GivenExceptionMatches2(PyObject *err, PyObj
     return (PyErr_GivenExceptionMatches(err, exc_type1) || PyErr_GivenExceptionMatches(err, exc_type2));
 }
 #endif
-
-/* CStringEquals */
-static CYTHON_INLINE int __Pyx_StrEq(const char *s1, const char *s2) {
-    while (*s1 != '\0' && *s1 == *s2) { s1++; s2++; }
-    return *s1 == *s2;
-}
 
 /* CheckBinaryVersion */
 static int __Pyx_check_binary_version(void) {

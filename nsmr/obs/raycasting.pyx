@@ -4,15 +4,19 @@ cimport cython
 from libc.math cimport sqrt, sin, cos
 from libc.math cimport abs as cabs
 
-from nsmr.envs.consts import *
-
 @cython.boundscheck(False)
 @cython.wraparound(False)
 
 class Raycasting():
-    def __init__(self, list MAP, double resolution):
+    def __init__(self,
+                 list MAP,
+                 double resolution,
+                 double max_range,
+                 double min_range=0.0):
         self.MAP_RESO = 1.0 / resolution
         self.MAP_RESOLUTION = resolution
+        self.max_range = max_range
+        self.min_range = min_range
         self.MAP = MAP
         self.MAP_SIZE = [len(self.MAP), len(self.MAP[0])]
 
@@ -24,8 +28,8 @@ class Raycasting():
         cdef steep
         x0 = int(pose[0]*self.MAP_RESO)
         y0 = int(pose[1]*self.MAP_RESO)
-        x1 = int((pose[0]+MAX_RANGE * cos(pose[2]+angle))*self.MAP_RESO)
-        y1 = int((pose[1]+MAX_RANGE * sin(pose[2]+angle))*self.MAP_RESO)
+        x1 = int((pose[0]+self.max_range * cos(pose[2]+angle))*self.MAP_RESO)
+        y1 = int((pose[1]+self.max_range * sin(pose[2]+angle))*self.MAP_RESO)
         steep = False
         if cabs(y1-y0) > cabs(x1-x0):
             steep = True
@@ -45,14 +49,14 @@ class Raycasting():
             if not self.is_movable_grid(pose_):
                 _x = (x-x0)*(x-x0)
                 _y = (y-y0)*(y-y0)
-                return sqrt(_x + _y) * self.MAP_RESOLUTION
+                return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
         else:
             pose_[0] = x
             pose_[1] = y
             if not self.is_movable_grid(pose_):
                 _x = (x-x0)*(x-x0)
                 _y = (y-y0)*(y-y0)
-                return sqrt(_x + _y) * self.MAP_RESOLUTION
+                return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
         x_limit = x1 + x_step
         while x != x_limit:
             x = x + x_step
@@ -66,15 +70,15 @@ class Raycasting():
                 if not self.is_movable_grid(pose_):
                     _x = (x-x0)*(x-x0)
                     _y = (y-y0)*(y-y0)
-                    return sqrt(_x + _y) * self.MAP_RESOLUTION
+                    return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
             else:
                 pose_[0] = x
                 pose_[1] = y
                 if not self.is_movable_grid(pose_):
                     _x = (x-x0)*(x-x0)
                     _y = (y-y0)*(y-y0)
-                    return sqrt(_x + _y) * self.MAP_RESOLUTION
-        return MAX_RANGE
+                    return max(sqrt(_x + _y) * self.MAP_RESOLUTION, self.min_range)
+        return self.max_range
 
     def is_movable_grid(self, list pose):
         i = int(pose[0])
