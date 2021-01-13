@@ -13,10 +13,16 @@ class NSMR(object):
     def __init__(self, layout=SIMPLE_MAP):
         self.set_layout(layout)
         
-        self.lidar = Raycasting(self.MAP)
         self.obs = None
 
         self.reset_noise_param()
+
+    def set_layout(self, layout):
+        self.layout = self.get_layout(layout)
+        self.dimentions = [self.layout['dimention_x'], self.layout['dimention_y']]
+        self.MAP = self.init_map()
+        self.collision_map = self.get_collision_map(layout)
+        self.lidar = Raycasting(self.MAP)
 
     def reset_pose(self):
         while True:
@@ -26,7 +32,7 @@ class NSMR(object):
         self.pose = pose
         while True:
             target = self.get_random_pose()
-            dis = self.get_dis(self.pose, target)
+            dis = get_dis(self.pose, target)
             if not self.is_collision(target) or dis < ROBOT_RADIUS:
                 break
         self.target = target
@@ -36,9 +42,10 @@ class NSMR(object):
         self.time_until_stuck = np.random.exponential(EXPECTED_STUCK_TIME)
         self.time_until_escape = np.random.exponential(EXPECTED_ESCAPE_TIME)
         self.is_stuck = False
-        self.lidar_pos_noise = [np.random.normal(0.0, LIDAR_POSE_NOISE),
-                                np.random.normal(0.0, LIDAR_POSE_NOISE),
-                                np.random.normal(0.0, LIDAR_ORIENTATION_NOISE)]
+        self.lidar_pos_noise = np.array([np.random.normal(0.0, LIDAR_POSE_NOISE),
+                                         np.random.normal(0.0, LIDAR_POSE_NOISE),
+                                         np.random.normal(0.0, LIDAR_ORIENTATION_NOISE)
+                                        ])
 
     def update(self, action):
         action = self.add_bias(action)
@@ -84,13 +91,6 @@ class NSMR(object):
         action[1] *= (not self.is_stuck)
         return action
 
-    def set_layout(self, layout):
-        self.layout = self.get_layout(layout)
-        self.dimentions = [self.layout['dimention_x'], self.layout['dimention_y']]
-        self.MAP = self.init_map()
-        self.collision_map = self.get_collision_map(layout)
-        self.lidar = Raycasting(self.MAP)
-
     def available_index(self, i, j):
         return (0<=i<self.dimentions[0] and 0<=j<self.dimentions[1])
     
@@ -107,13 +107,12 @@ class NSMR(object):
     def get_lidar(self, pose=None):
         if pose is None:
             pose = self.pose.copy()
-        pose[0] += self.lidar_pos_noise[0]
-        pose[1] += self.lidar_pos_noise[1]
-        pose[2] += self.lidar_pos_noise[2]
+        pose += self.lidar_pos_noise
+        pose[2] = angle_normalize(pose[2])
         obs = np.empty(NUM_LIDAR)
         for i in range(len(obs)):
             angle = i * ANGLE_INCREMENT - MAX_ANGLE
-            obs[i] = self.lidar.process(pose, angle)
+            obs[i] = self.lidar.process(pose.tolist(), angle)
             if np.random.rand() < OVERSIGHT_PROB:
                 obs[i] = np.random.rand()*(MAX_RANGE-MIN_RANGE) + MIN_RANGE
         obs += np.random.normal(0, LIDAR_NOISE)
@@ -125,20 +124,27 @@ class NSMR(object):
             pose = self.pose
         if target is None:
             target = self.target
-        dis = self.get_dis(target, pose)
+        dis = get_dis(target, pose)
         theta = np.arctan2((target[1]-pose[1]),(target[0]-pose[0]))
         theta = angle_diff(theta, pose[2])
         return np.array([dis, np.sin(theta), np.cos(theta)])
 
     def get_random_pose(self):
-        pose = [np.random.rand()*self.dimentions[0]*RESOLUTION,
-                np.random.rand()*self.dimentions[1]*RESOLUTION,
-                np.random.rand()*2.0*np.pi]
+        scale = np.array([self.dimentions[0]*RESOLUTION,
+                          self.dimentions[1]*RESOLUTION,
+                          2.0*np.pi])
+        pose = np.random.rand(3)*scale
         return pose
 
-    def get_dis(self, pa, pb):
-        dis = np.sqrt((pa[0]-pb[0])*(pa[0]-pb[0]) + (pa[1]-pb[1])*(pa[1]-pb[1]))
-        return dis
+    def get_layout(self, layout):
+        file_path = os.path.join(
+            os.path.dirname(__file__), "../layouts", str(layout) + ".json")
+        if os.path.exists(file_path):
+            with open(file_path) as f:
+                layout = json.load(f)
+        else:
+            pass 
+        return layout
     
     def init_map(self):
         MAP = [[False for i in range(self.dimentions[1])] for j in range(self.dimentions[0])]
@@ -161,6 +167,37 @@ class NSMR(object):
             for j in range(info["t"]-1, info["b"]):
                 if self.available_index(i,j):
                     MAP[i][j] = True
+
+    def get_collision_map(self, layout):
+        file_path = os.path.join(
+            os.path.dirname(__file__), "../layouts", str(layout) + "_collision_map.pkl")
+        if os.path.exists(file_path):
+            with open(file_path, 'rb') as f:
+                collision_map = pickle.load(f)
+        else:
+            collision_map = self.make_collision_map()
+            with open(file_path, 'wb') as f:
+                pickle.dump(collision_map, f)
+        return collision_map
+
+    def make_collision_map(self):
+        radius = int(ROBOT_RADIUS/RESOLUTION)
+        collision_map = [[False for i in range(self.dimentions[1])] for j in range(self.dimentions[0])]
+        # make wall
+        for i in range(0, self.dimentions[0]-1):
+            for j in range(0, radius-1):
+                collision_map[i][j] = True
+                collision_map[i][self.dimentions[1]-1-j] = True
+        for j in range(1, self.dimentions[1]-2):
+            for i in range(0, radius-1):
+                collision_map[i][j] = True
+                collision_map[self.dimentions[0]-1-i][j] = True
+        # make obj
+        for obj_info in self.layout['static_objects']:
+            typ = obj_info['type']
+            if typ == "Block":
+                self.make_rect_collision_map(collision_map, obj_info, radius)
+        return collision_map
     
     def make_rect_collision_map(self, MAP, info, radius):
         for i in range(info["l"]-1-radius, info["r"]+radius):
@@ -185,39 +222,3 @@ class NSMR(object):
                 dis = np.sqrt((info["r"]-i)*(info["r"]-i)+(info["b"]-j)*(info["b"]-j))
                 if dis > radius:
                     MAP[i][j] = False
-
-    def make_collision_map(self):
-        radius = int(ROBOT_RADIUS/RESOLUTION)
-        collision_map = [[False for i in range(self.dimentions[1])] for j in range(self.dimentions[0])]
-        # make wall
-        for i in range(0, self.dimentions[0]-1):
-            for j in range(0, radius-1):
-                collision_map[i][j] = True
-                collision_map[i][self.dimentions[1]-1-j] = True
-        for j in range(1, self.dimentions[1]-2):
-            for i in range(0, radius-1):
-                collision_map[i][j] = True
-                collision_map[self.dimentions[0]-1-i][j] = True
-        # make obj
-        for obj_info in self.layout['static_objects']:
-            typ = obj_info['type']
-            if typ == "Block":
-                self.make_rect_collision_map(collision_map, obj_info, radius)
-        return collision_map
-
-    def get_collision_map(self, layout):
-        file_path = os.path.join(os.path.dirname(__file__), "../layouts", str(layout) + "_collision_map.pkl")
-        if os.path.exists(file_path):
-            with open(file_path, 'rb') as f:
-                collision_map = pickle.load(f)
-        else:
-            collision_map = self.make_collision_map()
-            with open(file_path, 'wb') as f:
-                pickle.dump(collision_map, f)
-        return collision_map
-
-    def get_layout(self, layout):
-        file_path = os.path.join(os.path.dirname(__file__), "../layouts", str(layout) + ".json")
-        with open(file_path) as f:
-            layout = json.load(f)
-        return layout
