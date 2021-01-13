@@ -12,7 +12,7 @@ def _requires_from_file(filename):
     return open(filename).read().splitlines()
 
 ext_modules = [
-    Extension('nsmr.envs.obs.raycasting', sources=['nsmr/envs/obs/raycasting.pyx'])
+    Extension('nsmr.obs.raycasting', sources=['nsmr/obs/raycasting.pyx'])
 ]
 
 setup(

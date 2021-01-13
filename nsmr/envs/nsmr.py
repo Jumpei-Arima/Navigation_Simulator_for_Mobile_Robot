@@ -6,7 +6,8 @@ import pickle
 import numpy as np
 
 from nsmr.envs.consts import *
-from nsmr.envs.obs.raycasting import Raycasting
+from nsmr.obs.raycasting import Raycasting
+from nsmr.utils.utils import *
 
 class NSMR(object):
     def __init__(self, layout=SIMPLE_MAP):
@@ -55,7 +56,7 @@ class NSMR(object):
             self.pose[0] += action[0]/action[1]*(np.sin(pre_theta+action[1]*DT)-np.sin(pre_theta))
             self.pose[1] += action[0]/action[1]*(-np.cos(pre_theta+action[1]*DT)+np.cos(pre_theta))
             self.pose[2] += action[1]*DT
-        self.pose[2] = self.angle_normalize(self.pose[2])
+        self.pose[2] = angle_normalize(self.pose[2])
 
     def add_noise(self, action):
         self.distance_until_noise -= abs(action[0])*DT + ROBOT_RADIUS*abs(action[1])*DT
@@ -126,23 +127,8 @@ class NSMR(object):
             target = self.target
         dis = self.get_dis(target, pose)
         theta = np.arctan2((target[1]-pose[1]),(target[0]-pose[0]))
-        theta = self.angle_diff(theta, pose[2])
+        theta = angle_diff(theta, pose[2])
         return np.array([dis, np.sin(theta), np.cos(theta)])
-
-    def angle_normalize(self, z):
-        return np.arctan2(np.sin(z), np.cos(z))
-
-    def angle_diff(self, a, b):
-        a = self.angle_normalize(a)
-        b = self.angle_normalize(b)
-        d1 = a-b
-        d2 = 2.0 * np.pi - abs(d1)
-        if d1 > 0.0:
-            d2 *= -1.0
-        if abs(d1) < abs(d2):
-            return d1
-        else:
-            return d2
 
     def get_random_pose(self):
         pose = [np.random.rand()*self.dimentions[0]*RESOLUTION,
@@ -220,7 +206,7 @@ class NSMR(object):
         return collision_map
 
     def get_collision_map(self, layout):
-        file_path = os.path.join(os.path.dirname(__file__), "layouts", str(layout) + "_collision_map.pkl")
+        file_path = os.path.join(os.path.dirname(__file__), "../layouts", str(layout) + "_collision_map.pkl")
         if os.path.exists(file_path):
             with open(file_path, 'rb') as f:
                 collision_map = pickle.load(f)
@@ -231,8 +217,7 @@ class NSMR(object):
         return collision_map
 
     def get_layout(self, layout):
-        file_path = os.path.join(os.path.dirname(__file__), "layouts", str(layout) + ".json")
+        file_path = os.path.join(os.path.dirname(__file__), "../layouts", str(layout) + ".json")
         with open(file_path) as f:
             layout = json.load(f)
         return layout
-
