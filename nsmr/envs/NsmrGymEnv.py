@@ -66,7 +66,9 @@ class NsmrGymEnv(gym.Env):
         observation = self.get_observation()
         reward = self.get_reward(observation)
         done = self.is_done()
-        info = {"pose": self.nsmr.pose, "target": self.nsmr.target}
+        info = {"pose": self.nsmr.pose,
+                "target": self.nsmr.target,
+                "goal": self.goal}
 
         return observation, reward, done, info
 
