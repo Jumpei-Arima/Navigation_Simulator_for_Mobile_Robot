@@ -74,3 +74,6 @@ class Renderer(object):
     def close(self):
         if self.viewer:
             self.viewer.close()
+
+    def reset(self):
+        self.viewer = None
