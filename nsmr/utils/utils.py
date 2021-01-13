@@ -14,3 +14,6 @@ def angle_diff(a, b):
         return d1
     else:
         return d2
+
+def get_dis(a, b):
+    return np.linalg.norm(a[:2]-b[:2])
