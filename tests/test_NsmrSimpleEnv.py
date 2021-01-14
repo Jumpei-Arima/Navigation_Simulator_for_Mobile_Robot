@@ -8,7 +8,7 @@ print(__file__)
 
 class TestNsmrSimpleGymEnv(TestCase):
     def test_main(self):
-        env = gym.make("NsmrSimple-v0")
+        env = gym.make("NsmrSimple-v1")
         obs = env.reset()
         # Try stepping a few times
         for i in range(10):
@@ -17,7 +17,7 @@ class TestNsmrSimpleGymEnv(TestCase):
         env.close()
 
     def test_render(self):
-        env = gym.make("NsmrSimple-v0")
+        env = gym.make("NsmrSimple-v1")
         obs = env.reset()
         # Try stepping a few times
         for i in range(10):
@@ -27,7 +27,7 @@ class TestNsmrSimpleGymEnv(TestCase):
         env.close()
 
     def test_reward_params(self):
-        env = gym.make("NsmrSimple-v0")
+        env = gym.make("NsmrSimple-v1")
         params={"goal_reward": 5.0,
                 "collision_penalty": 5.0,
                 "alpha": 0.3,

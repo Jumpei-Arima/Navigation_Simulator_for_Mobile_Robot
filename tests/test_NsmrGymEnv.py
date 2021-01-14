@@ -8,7 +8,7 @@ print(__file__)
 
 class TestNsmrGymEnv(TestCase):
     def test_main(self):
-        env = gym.make("nsmr-v0")
+        env = gym.make("Nsmr-v1")
         obs = env.reset()
         # Try stepping a few times
         for i in range(10):
@@ -17,7 +17,7 @@ class TestNsmrGymEnv(TestCase):
         env.close()
 
     def test_render(self):
-        env = gym.make("nsmr-v0")
+        env = gym.make("Nsmr-v1")
         obs = env.reset()
         # Try stepping a few times
         for i in range(10):
@@ -27,7 +27,7 @@ class TestNsmrGymEnv(TestCase):
         env.close()
 
     def test_reward_params(self):
-        env = gym.make("nsmr-v0")
+        env = gym.make("Nsmr-v1")
         params={"goal_reward": 5.0,
                 "collision_penalty": 5.0,
                 "alpha": 0.3,
@@ -41,17 +41,22 @@ class TestNsmrGymEnv(TestCase):
             obs, reward, done, info = env.step(action)
         env.close()
 
-    def test_make_collision_map(self):
-        shutil.copyfile("./tests/test_map.json", "./nsmr/envs/layouts/test_map.json")
-        env = gym.make("nsmr-v0")
-        env.set_layout("test_map")
+    def test_set_config(self):
+        base_path = os.path.dirname(__file__)
+        env = gym.make("Nsmr-v1")
+        env.set_env_config(robot=os.path.join(base_path, "test_robot.json"),
+                           layout=os.path.join(base_path, "test_map.json"))
+        obs = env.reset()
+        # Try stepping a few times
+        for i in range(10):
+            action = env.action_space.sample()
+            obs, reward, done, info = env.step(action)
         env.close()
-        os.remove("./nsmr/envs/layouts/test_map.json")
-        os.remove("./nsmr/envs/layouts/test_map_collision_map.pkl")
+        os.remove(os.path.join(base_path, "test_map_collision_map.pkl"))
 
 if __name__ == '__main__':  # pragma: no cover
     test = TestNsmrGymEnv()
     test.test_main()
     test.test_render()
     test.test_reward_params()
-    test.test_make_collision_map()
+    test.test_set_config()
