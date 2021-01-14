@@ -41,6 +41,6 @@ jobs:
         xvfb-run -a -s "-screen 0 1024x768x24 -ac +extension GLX +render -noreset" ./run_tests.sh
     - name: Coverage
       env: 
-        COVERALLS_REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.GITHUB_TOKEN }}
       run: |
         coveralls
