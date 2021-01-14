@@ -1,6 +1,7 @@
 import numpy as np
 import gym
 from gym import spaces
+from gym.utils import seeding
 
 from nsmr.envs.nsmr import NSMR
 from nsmr.envs.renderer import Renderer
