@@ -1,5 +1,6 @@
 {
     "dimention_x": 1000,
     "dimention_y": 1000,
+    "resolution": 0.01,
     "static_objects": []
 }

@@ -12,12 +12,12 @@ def _requires_from_file(filename):
     return open(filename).read().splitlines()
 
 ext_modules = [
-    Extension('nsmr.envs.obs.raycasting', sources=['nsmr/envs/obs/raycasting.pyx'])
+    Extension('nsmr.obs.raycasting', sources=['nsmr/obs/raycasting.pyx'])
 ]
 
 setup(
     name='nsmr',
-    version='0.2.0',
+    version='1.0.0',
     url='https://github.com/Jumpei-Arima/Navigation_Simulator_for_Mobile_Robot',
     author='Jumpei Arima',
     author_email='arijun0307@gmail.com',

@@ -1,4 +1,5 @@
 {
+    "resolution": 0.01,
     "dimention_x": 1000,
     "dimention_y": 1000,
     "static_objects": [

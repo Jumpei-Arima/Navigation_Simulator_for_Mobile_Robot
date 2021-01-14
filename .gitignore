@@ -8,3 +8,4 @@ build/
 dist/
 *.so
 *cache/
+.coverage

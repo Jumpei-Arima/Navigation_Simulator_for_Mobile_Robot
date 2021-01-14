@@ -1,19 +1,20 @@
-from nsmr.envs.consts import *
+from gym.envs.classic_control import rendering
 
 class Renderer(object):
-    def __init__(self, dimentions):
+    def __init__(self, dimentions, resolution, robot):
         self.viewer = None
         self.margin = 0.2
         screen_size = 600
-        self.SKIP_RENDER = 20
-        world_width_x = dimentions[0]*RESOLUTION + self.margin * 2.0
-        world_width_y = dimentions[1]*RESOLUTION + self.margin * 2.0
+        self.SKIP_RENDER = 20 
+        self.resolution = resolution
+        self.robot = robot
+        world_width_x = dimentions[0]*self.resolution + self.margin * 2.0
+        world_width_y = dimentions[1]*self.resolution + self.margin * 2.0
         self.scale = screen_size / max(world_width_x, world_width_y)
         self.screen_width = int(world_width_x*self.scale)
         self.screen_height = int(world_width_y*self.scale)
 
     def render(self, state, mode):
-        from gym.envs.classic_control import rendering
         if self.viewer is None:
             self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
             #wall
@@ -22,18 +23,18 @@ class Renderer(object):
             wall.set_color(0.,0.,0.)
             self.viewer.add_geom(wall)
             #robot
-            robot = rendering.make_circle(ROBOT_RADIUS*self.scale)
+            robot = rendering.make_circle(self.robot["radius"]*self.scale)
             self.robot_trans = rendering.Transform()
             robot.add_attr(self.robot_trans)
             robot.set_color(0.0,0.0,1.0)
             self.viewer.add_geom(robot)
-            robot_orientation = rendering.make_capsule(ROBOT_RADIUS*self.scale,1.0)
+            robot_orientation = rendering.make_capsule(self.robot["radius"]*self.scale,1.0)
             self.orientation_trans = rendering.Transform()
             robot_orientation.set_color(0.0,1.0,0.0)
             robot_orientation.add_attr(self.orientation_trans)
             self.viewer.add_geom(robot_orientation)
             #target
-            target = rendering.make_circle(ROBOT_RADIUS*0.3*self.scale)
+            target = rendering.make_circle(self.robot["radius"]*0.3*self.scale)
             self.target_trans = rendering.Transform()
             target.add_attr(self.target_trans)
             target.set_color(1.0,0.0,0.0)
@@ -58,17 +59,17 @@ class Renderer(object):
                     lidar = rendering.make_capsule(self.scale*state.obs[i],1.0)
                     lidar_trans = rendering.Transform()
                     lidar_trans.set_translation(robot_x,robot_y)
-                    lidar_trans.set_rotation(state.pose[2] + i*ANGLE_INCREMENT - MAX_ANGLE)
+                    lidar_trans.set_rotation(state.pose[2] + i*self.robot["lidar"]["angle_increment"] - self.robot["lidar"]["max_angle"])
                     lidar.set_color(1.0,0.0,0.0)
                     lidar.add_attr(lidar_trans)
                     self.viewer.add_onetime(lidar)
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
     def get_lrtb(self, l, r, t, b):
-        l = (self.margin+l*RESOLUTION) * self.scale
-        r = (self.margin+r*RESOLUTION) * self.scale
-        t = (self.margin+t*RESOLUTION) * self.scale
-        b = (self.margin+b*RESOLUTION) * self.scale
+        l = (self.margin+l*self.resolution) * self.scale
+        r = (self.margin+r*self.resolution) * self.scale
+        t = (self.margin+t*self.resolution) * self.scale
+        b = (self.margin+b*self.resolution) * self.scale
         return l, r, t, b
 
     def close(self):
