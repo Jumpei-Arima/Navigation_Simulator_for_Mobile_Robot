@@ -1,13 +1,14 @@
 from nsmr.envs.consts import *
 
 class Renderer(object):
-    def __init__(self, dimentions):
+    def __init__(self, dimentions, resolution):
         self.viewer = None
         self.margin = 0.2
         screen_size = 600
-        self.SKIP_RENDER = 20
-        world_width_x = dimentions[0]*RESOLUTION + self.margin * 2.0
-        world_width_y = dimentions[1]*RESOLUTION + self.margin * 2.0
+        self.SKIP_RENDER = 20 
+        self.resolution = resolution
+        world_width_x = dimentions[0]*self.resolution + self.margin * 2.0
+        world_width_y = dimentions[1]*self.resolution + self.margin * 2.0
         self.scale = screen_size / max(world_width_x, world_width_y)
         self.screen_width = int(world_width_x*self.scale)
         self.screen_height = int(world_width_y*self.scale)
@@ -65,10 +66,10 @@ class Renderer(object):
         return self.viewer.render(return_rgb_array = mode=='rgb_array')
 
     def get_lrtb(self, l, r, t, b):
-        l = (self.margin+l*RESOLUTION) * self.scale
-        r = (self.margin+r*RESOLUTION) * self.scale
-        t = (self.margin+t*RESOLUTION) * self.scale
-        b = (self.margin+b*RESOLUTION) * self.scale
+        l = (self.margin+l*self.resolution) * self.scale
+        r = (self.margin+r*self.resolution) * self.scale
+        t = (self.margin+t*self.resolution) * self.scale
+        b = (self.margin+b*self.resolution) * self.scale
         return l, r, t, b
 
     def close(self):
