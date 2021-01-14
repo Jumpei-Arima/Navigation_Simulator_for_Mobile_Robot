@@ -3,7 +3,6 @@ from gym.envs.registration import register
 from nsmr.envs.NsmrGymEnv import NsmrGymEnv
 from nsmr.envs.NsmrSimpleGymEnv import NsmrSimpleGymEnv
 from nsmr.envs.NsmrMinPoolingGymEnv import NsmrMinPoolingGymEnv
-from nsmr.envs.consts import *
 
 register(
     id='Nsmr-v1',

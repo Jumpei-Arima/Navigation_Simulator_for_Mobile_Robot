@@ -20,21 +20,12 @@ class NsmrSimpleGymEnv(gym.Env):
         self.nsmr = NSMR(robot=robot, layout=layout)
 
         # gym space
-        self.observation_space = spaces.Dict(dict(
-            pose=spaces.Box(np.array([-10,-10,-3.141592]), np.array([10,10,3.141592])),
-            target=spaces.Box(np.array([-10,-10,-3.141592]), np.array([10,10,3.141592]))
-        ))
-        self.action_space = spaces.Box(
-            low = np.array([self.nsmr.robot["min_linear_velocity"],
-                            self.nsmr.robot["min_angular_velocity"]]),
-            high = np.array([self.nsmr.robot["max_linear_velocity"],
-                             self.nsmr.robot["max_angular_velocity"]]),
-            dtype = np.float32
-            )
+        self.set_gym_space()
 
         # renderer
-        self.renderer = Renderer(self.nsmr.dimentions, self.nsmr.layout['resolution'])
-
+        self.renderer = Renderer(self.nsmr.dimentions,
+                                 self.nsmr.layout['resolution'],
+                                 self.nsmr.robot)
         # reward params
         self.reward_params = reward_params
 
@@ -46,13 +37,19 @@ class NsmrSimpleGymEnv(gym.Env):
         self.reward_params = reward_params
         self.reset()
 
-    def set_robot(self, robot):
-        self.nsmr.set_robot(robot)
+    def set_env_config(self, robot, layout):
+        self.nsmr.set_config(robot, layout)
+        self.set_gym_space()
+        self.renderer = Renderer(self.nsmr.dimentions,
+                                 self.nsmr.layout['resolution'],
+                                 self.nsmr.robot)
         self.reset()
 
     def set_layout(self, layout):
         self.nsmr.set_layout(layout)
-        self.renderer = Renderer(self.nsmr.dimentions, self.nsmr.layout['resolution'])
+        self.renderer = Renderer(self.nsmr.dimentions,
+                                 self.nsmr.layout['resolution'],
+                                 self.nsmr.robot["radius"])
         self.reset()
 
     def reset(self):
@@ -113,3 +110,17 @@ class NsmrSimpleGymEnv(gym.Env):
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
         return [seed]
+    
+    def set_gym_space(self):
+        # gym space
+        self.observation_space = spaces.Dict(dict(
+            pose=spaces.Box(np.array([-10,-10,-3.141592]), np.array([10,10,3.141592])),
+            target=spaces.Box(np.array([-10,-10,-3.141592]), np.array([10,10,3.141592]))
+        ))
+        self.action_space = spaces.Box(
+            low = np.array([self.nsmr.robot["min_linear_velocity"],
+                            self.nsmr.robot["min_angular_velocity"]]),
+            high = np.array([self.nsmr.robot["max_linear_velocity"],
+                             self.nsmr.robot["max_angular_velocity"]]),
+            dtype = np.float32
+            )

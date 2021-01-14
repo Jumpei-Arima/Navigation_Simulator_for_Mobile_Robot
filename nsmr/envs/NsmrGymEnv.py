@@ -28,7 +28,9 @@ class NsmrGymEnv(gym.Env):
         self.set_gym_space()
 
         # renderer
-        self.renderer = Renderer(self.nsmr.dimentions, self.nsmr.layout['resolution'])
+        self.renderer = Renderer(self.nsmr.dimentions,
+                                 self.nsmr.layout['resolution'],
+                                 self.nsmr.robot)
 
         # reward params
         self.reward_params = reward_params
@@ -43,7 +45,9 @@ class NsmrGymEnv(gym.Env):
     def set_env_config(self, robot, layout):
         self.nsmr.set_config(robot, layout)
         self.set_gym_space()
-        self.renderer = Renderer(self.nsmr.dimentions, self.nsmr.layout['resolution'])
+        self.renderer = Renderer(self.nsmr.dimentions,
+                                 self.nsmr.layout['resolution'],
+                                 self.nsmr.robot)
         self.reset()
 
     def reset(self):
