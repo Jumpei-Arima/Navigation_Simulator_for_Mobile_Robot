@@ -1,5 +1,3 @@
-from gym.envs.classic_control import rendering
-
 class Renderer(object):
     def __init__(self, dimentions, resolution, robot):
         self.viewer = None
@@ -15,6 +13,7 @@ class Renderer(object):
         self.screen_height = int(world_width_y*self.scale)
 
     def render(self, state, mode):
+        from gym.envs.classic_control import rendering
         if self.viewer is None:
             self.viewer = rendering.Viewer(self.screen_width, self.screen_height)
             #wall
