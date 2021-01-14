@@ -45,13 +45,6 @@ class NsmrSimpleGymEnv(gym.Env):
                                  self.nsmr.robot)
         self.reset()
 
-    def set_layout(self, layout):
-        self.nsmr.set_layout(layout)
-        self.renderer = Renderer(self.nsmr.dimentions,
-                                 self.nsmr.layout['resolution'],
-                                 self.nsmr.robot["radius"])
-        self.reset()
-
     def reset(self):
         self.t = 0
         self.nsmr.reset_pose()
