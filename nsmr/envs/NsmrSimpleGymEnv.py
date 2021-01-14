@@ -2,20 +2,21 @@ import numpy as np
 import gym
 from gym import spaces
 
-from nsmr.envs.consts import *
-from nsmr.envs.renderer import Renderer
 from nsmr.envs.nsmr import NSMR
+from nsmr.envs.renderer import Renderer
 
 class NsmrSimpleGymEnv(gym.Env):
     def __init__(self,
-                 layout=NO_OBJECT,
+                 robot="robot",
+                 layout="no_object",
                  reward_params={"goal_reward": 5.0,
                                 "alpha": 0.3,
                                 "beta": 0.01,
                                 "stop_penalty": 0.05},
+                 max_steps=500
                  ):
         # simulator
-        self.nsmr = NSMR(layout)
+        self.nsmr = NSMR(robot=robot, layout=layout)
 
         # gym space
         self.observation_space = spaces.Dict(dict(
@@ -23,14 +24,20 @@ class NsmrSimpleGymEnv(gym.Env):
             target=spaces.Box(np.array([-10,-10,-3.141592]), np.array([10,10,3.141592]))
         ))
         self.action_space = spaces.Box(
-            np.array([MIN_LINEAR_VELOCITY,MIN_ANGULAR_VELOCITY]),
-            np.array([MAX_LINEAR_VELOCITY,MAX_ANGULAR_VELOCITY]))
+            low = np.array([self.nsmr.robot["min_linear_velocity"],
+                            self.nsmr.robot["min_angular_velocity"]]),
+            high = np.array([self.nsmr.robot["max_linear_velocity"],
+                             self.nsmr.robot["max_angular_velocity"]]),
+            dtype = np.float32
+            )
 
         # renderer
-        self.renderer = Renderer(self.nsmr.dimentions)
+        self.renderer = Renderer(self.nsmr.dimentions, self.nsmr.layout['resolution'])
 
         # reward params
         self.reward_params = reward_params
+
+        self.max_steps = max_steps
 
         self.reset()
 
@@ -38,9 +45,13 @@ class NsmrSimpleGymEnv(gym.Env):
         self.reward_params = reward_params
         self.reset()
 
+    def set_robot(self, robot):
+        self.nsmr.set_robot(robot)
+        self.reset()
+
     def set_layout(self, layout):
         self.nsmr.set_layout(layout)
-        self.renderer = Renderer(self.nsmr.dimentions)
+        self.renderer = Renderer(self.nsmr.dimentions, self.nsmr.layout['resolution'])
         self.reset()
 
     def reset(self):
@@ -76,7 +87,7 @@ class NsmrSimpleGymEnv(gym.Env):
         dis = target_info[0]
         ddis = self.pre_dis - dis
         theta = np.arccos(target_info[2])
-        if dis < ROBOT_RADIUS:
+        if dis < self.nsmr.robot["radius"]:
             reward = self.reward_params["goal_reward"]
             self.goal = True
         else:
@@ -89,7 +100,7 @@ class NsmrSimpleGymEnv(gym.Env):
     
     def is_done(self):
         done = False
-        if self.t >= MAX_STEPS:
+        if self.t >= self.max_steps:
             done = True
         if self.goal:
             done = True
