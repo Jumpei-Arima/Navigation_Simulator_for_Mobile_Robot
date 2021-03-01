@@ -9,3 +9,5 @@ dist/
 *.so
 *cache/
 .coverage
+
+.vscode
